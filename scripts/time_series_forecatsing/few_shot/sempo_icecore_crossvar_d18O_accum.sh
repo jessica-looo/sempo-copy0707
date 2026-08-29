@@ -27,7 +27,7 @@ else
   pair_suffix="_pair_d${use_pair_diff}_p${use_pair_product}"
 fi
 relation_pretrain_setting=long_term_forecast_SEMPO_d18O_accum_crossvar_relation_pretrain_k${num_prototypes}_sl${seq_len}_dm256_el3${pair_suffix}_0
-
+split_path="./dataset/icecore/splits.csv"
 
 torchrun --nnodes=1 --nproc_per_node=1 --master_port=29503 run.py \
   --task_name long_term_forecast \
@@ -84,6 +84,7 @@ torchrun --nnodes=1 --nproc_per_node=1 --master_port=29503 run.py \
   --support_ratio 0.66 \
   --x_data_path "d18O/d18O_clean.csv" \
   --y_data_path "accum/accum_100y.csv" \
+  --site_split_path "$split_path" \
   --target_anchor_residual \
   --target_anchor_len 16 \
   --use_context_memory \

@@ -55,7 +55,7 @@ if __name__ == '__main__':
     parser.add_argument('--pred_seperate', type=str, default=None, help='每个cluster单独预测') #弃用
     parser.add_argument('--filter_cid', type=int, default=None, help='每个cluster单独预测')
     parser.add_argument('--support_ratio', type=float, default=None, help='per-site support比例(如0.66), None=固定100年')
-
+    parser.add_argument('--site_split_path', type=str, default=None, help='CSV file defining fixed site-level train/val/test split')
 
 
     # forecasting task

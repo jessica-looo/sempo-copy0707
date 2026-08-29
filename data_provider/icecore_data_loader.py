@@ -439,6 +439,7 @@ class Dataset_IceCore_CrossVar(Dataset):
                  target_anchor_len=16,
                  pred_seperate=None,
                  support_ratio=None,
+                 site_split_path=None,
                  filter_cid=None,
                  use_encoder_proto_static=False,
                  encoder_proto_path=None,
@@ -484,6 +485,7 @@ class Dataset_IceCore_CrossVar(Dataset):
         self.target_anchor_residual = target_anchor_residual
         self.target_anchor_len = int(target_anchor_len)
         self.support_ratio = support_ratio
+        self.site_split_path = site_split_path
         self.filter_cid = filter_cid
         self.verbose = verbose
         self.use_encoder_proto_static = use_encoder_proto_static
@@ -569,20 +571,26 @@ class Dataset_IceCore_CrossVar(Dataset):
         # =========================
         # 4. Split train / val / test
         # =========================
-        preferred_test_site_ranks = build_preferred_test_site_ranks(
-            root_path=self.root_path,
-            year_col='year',
-            verbose=(self.verbose and self.set_type == 0)
-        )
+        if self.site_split_path:
+            train_sites, val_sites, test_sites = split_sites_from_file(
+                valid_sites=valid_sites,
+                split_path=self.site_split_path
+            )
+        else:
+            preferred_test_site_ranks = build_preferred_test_site_ranks(
+                root_path=self.root_path,
+                year_col='year',
+                verbose=(self.verbose and self.set_type == 0)
+            )
 
-        train_sites, val_sites, test_sites = split_sites_by_cluster(
-            valid_sites=valid_sites,
-            cluster_map=self.cluster_map,
-            seed=2030,
-            train_ratio=0.6,
-            filter_cid=self.filter_cid,
-            preferred_test_site_ranks=preferred_test_site_ranks
-        )
+            train_sites, val_sites, test_sites = split_sites_by_cluster(
+                valid_sites=valid_sites,
+                cluster_map=self.cluster_map,
+                seed=2030,
+                train_ratio=0.6,
+                filter_cid=self.filter_cid,
+                preferred_test_site_ranks=preferred_test_site_ranks
+            )
 
         self.train_sites = train_sites
         self.val_sites = val_sites
@@ -594,9 +602,9 @@ class Dataset_IceCore_CrossVar(Dataset):
                 val_sites=val_sites,
                 test_sites=test_sites,
                 cluster_map=self.cluster_map,
+                mode='fixed' if self.site_split_path else 'cluster',
                 invalid_sites=invalid_sites
             )
-
         self.current_sites = select_current_sites(
             self.set_type,
             train_sites,

@@ -120,6 +120,7 @@ def _build_dataset(args, flag, timeenc):
         if task_type == 'crossvar':
             kwargs['target_anchor_residual'] = getattr(args, 'target_anchor_residual', False)
             kwargs['target_anchor_len'] = getattr(args, 'target_anchor_len', 16)
+            kwargs['site_split_path'] = getattr(args, 'site_split_path', None)
 
     data_set = Data(**kwargs)
     if hasattr(data_set, 'target_idx'):

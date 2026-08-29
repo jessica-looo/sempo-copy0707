@@ -375,6 +375,86 @@ def build_preferred_test_site_ranks(root_path, year_col='year', verbose=False):
 
     return ranks
 
+def split_sites_from_file(valid_sites, split_path):
+    """Read a fixed site-level train/val/test split from CSV."""
+    if not split_path:
+        raise ValueError("split_path is empty")
+
+    if not os.path.exists(split_path):
+        raise FileNotFoundError(f"Split file not found: {split_path}")
+
+    split_df = pd.read_csv(split_path)
+
+    if not {'site', 'split'}.issubset(split_df.columns):
+        raise ValueError("Split CSV must contain columns: site, split")
+
+    split_df = split_df[['site', 'split']].copy()
+    split_df['site_clean'] = split_df['site'].map(clean_site_name)
+    split_df['split'] = (
+        split_df['split']
+        .astype(str)
+        .str.strip()
+        .str.lower()
+    )
+
+    invalid_labels = sorted(
+        set(split_df['split']) - {'train', 'val', 'test'}
+    )
+    if invalid_labels:
+        raise ValueError(f"Invalid split labels: {invalid_labels}")
+
+    duplicates = split_df.loc[
+        split_df['site_clean'].duplicated(keep=False),
+        'site'
+    ].tolist()
+    if duplicates:
+        raise ValueError(
+            f"Duplicated sites in split CSV: {duplicates}"
+        )
+
+    valid_map = {
+        clean_site_name(site): site
+        for site in valid_sites
+    }
+    split_map = dict(
+        zip(split_df['site_clean'], split_df['split'])
+    )
+
+    missing_sites = sorted(set(valid_map) - set(split_map))
+    unknown_sites = sorted(set(split_map) - set(valid_map))
+
+    if missing_sites:
+        raise ValueError(
+            f"Valid sites missing from split CSV: {missing_sites}"
+        )
+
+    if unknown_sites:
+        raise ValueError(
+            f"Unknown or invalid sites in split CSV: {unknown_sites}"
+        )
+
+    train_sites = [
+        site for site in valid_sites
+        if split_map[clean_site_name(site)] == 'train'
+    ]
+    val_sites = [
+        site for site in valid_sites
+        if split_map[clean_site_name(site)] == 'val'
+    ]
+    test_sites = [
+        site for site in valid_sites
+        if split_map[clean_site_name(site)] == 'test'
+    ]
+
+    if not train_sites or not val_sites or not test_sites:
+        raise ValueError(
+            f"Empty split found: "
+            f"train={len(train_sites)}, "
+            f"val={len(val_sites)}, "
+            f"test={len(test_sites)}"
+        )
+
+    return train_sites, val_sites, test_sites
 
 def split_sites_by_cluster(
     valid_sites,
