@@ -1,0 +1,17 @@
+ip: 127.0.0.1, port: 29501, hosts: 1, rank: 0, local_rank: 0, gpus: 1
+init_process_group finished
+Args in experiment:
+>>>>>>>start training : long_term_forecast_SEMPO_CI_ftM_sl512_ll48_pl96_pl64_dm256_nh2_el3_dl3_df128_fc1_ebtimeF_dtTrue_0>>>>>>>>>>>>>>>>>>>>>>>>>>
+train 2177
+val 19495
+test 19495
+loading model...
+Model parameters:  4070979
+	iters: 0, epoch: 1 | loss: 0.6811332 | cost_time: 1 | memory: allocated 249MB, reserved 326MB, cached 326MB 
+Epoch: 1 cost time: 1.330472707748413
+> /sharedata/home/cyyang/SEMPO/exp/exp_long_term_forecasting.py(116)vali()
+-> outputs = torch.cat([outputs[j][:, -h:, f_dim:] for j, h in enumerate(self.args.horizon_lengths) if j in self.idx], dim=1)
+(Pdb) --KeyboardInterrupt--
+(Pdb) --KeyboardInterrupt--
+(Pdb) --KeyboardInterrupt--
+(Pdb) 

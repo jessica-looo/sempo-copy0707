@@ -325,12 +325,12 @@ class MixtrueExpertsLayer(torch.nn.Module):
     def forward(self, x: torch.Tensor, prefix: torch.Tensor):
         # router
         # router_logits -> (bs * seq_len, n_experts)
-        router_logits = self.gate(x)  # bs x seq_len x d_model
-        routing_weights = F.softmax(router_logits, dim=2, dtype=torch.float)
+        router_logits = self.gate(x)  # bs x seq_len x d_model 每个专家偏好得分
+        routing_weights = F.softmax(router_logits, dim=2, dtype=torch.float) # 使用哪些专家 调用比例
     
         if self.prefix_projection:
-            prefix_tokens = self.embedding(prefix)
-            prefix_tokens = torch.einsum('...e,ed->...d', routing_weights, prefix_tokens)
+            prefix_tokens = self.embedding(prefix) # 提取目标前缀的基础特征矩阵
+            prefix_tokens = torch.einsum('...e,ed->...d', routing_weights, prefix_tokens) # 加权融合
             past_key_values = self.transform(prefix_tokens)
         else:
             prefix_tokens = self.embedding(prefix)

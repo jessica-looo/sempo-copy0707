@@ -1,9 +1,9 @@
 from models import SEMPO, SEMPO_CL
-from models.moirai.module import MoiraiModule
-from models.moirai_moe.module import MoiraiMoEModule
+# from models.moirai.module import MoiraiModule
+# from models.moirai_moe.module import MoiraiMoEModule
 from transformers import AutoModelForCausalLM
-from chronos import ChronosPipeline
-import timesfm
+# from chronos import ChronosPipeline
+# import timesfm
 import os
 import torch
 
@@ -14,15 +14,15 @@ class Exp_Basic(object):
         self.model_dict = {
             'SEMPO': SEMPO,
             'SEMPO_CL': SEMPO_CL,
-            'Moirai': MoiraiModule,
-            'Moirai-MoE': MoiraiMoEModule,
+            # 'Moirai': MoiraiModule,
+            # 'Moirai-MoE': MoiraiMoEModule,
             'Timer': AutoModelForCausalLM,
-            'Chronos': ChronosPipeline,
-            'TimesFM': timesfm,
+            # 'Chronos': ChronosPipeline,
+            # 'TimesFM': timesfm,
         }
         if self.args.use_multi_gpu:
             self.device = torch.device('cuda:{}'.format(self.args.local_rank))
-            self.model = self._build_model()        
+            self.model = self._build_model()  
         else:
             self.device = self._acquire_device()
             self.model = self._build_model().to(self.device)

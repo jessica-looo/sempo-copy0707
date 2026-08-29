@@ -18,7 +18,7 @@ stride=64
 
 for percent in 5
 do
-for pred_len in 96 192 336 720
+for pred_len in 64
 do
   torchrun --nnodes=1 --nproc_per_node=1 --master_port=29501 run.py \
     --task_name long_term_forecast \
@@ -51,6 +51,6 @@ do
     --num_workers 10 \
     --patience 6 \
     --use_multi_gpu \
-    --itr 1 >logs/Few-shot/$model_name'_'$data_name'_'$seq_len'_'$pred_len'_'$percent'_is_fewshot.log'
+    # --itr 1 >logs/Few-shot/$model_name'_'$data_name'_'$seq_len'_'$pred_len'_'$percent'_is_fewshot_test.log'
 done
 done

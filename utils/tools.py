@@ -198,68 +198,85 @@ class StandardScaler():
         return (data * self.std) + self.mean
 
 
+# def visual(true, preds=None, name='./pic/test.pdf'):
+#     """
+#     Results visualization
+#     """
+#     # # plt.figure()
+#     # return np.save("true.npy", true[0:96])
+#     # true = np.load('true.npy')
+#     # fourier = np.fft.rfft(true[0:96])
+#     # # fourier_out = fourier_1-fourier
+#     # # fourier = np.fft.fft(imp)
+#     # n = true[0:96].size
+#     # time_step = 0.01
+#     # freq = np.fft.fftfreq(n, d=time_step)
+#     # # plt.plot(freq, fourier.real)
+#     # output_amplitude_show = np.abs(fourier)
+#     # # output_phase_show = np.angle(fourier)
+#     # # plt.plot(freq, output_phase_show)
+#     # # plt.rcParams['font.sans-serif'] = ['Arial']
+#     # # plt.rcParams['font.size'] = 18
+#     # # output_amplitude_show[0] = 7
+#     # # output_amplitude_show[1] = 4.3
+#     # # output_amplitude_show[4] = 1.3
+#     # plt.figure(figsize=(12, 4))
+#     # plt.grid(linestyle="--")
+#     # plt.plot(np.arange(0, 49), output_amplitude_show, label='Spectrum', linewidth=0.1, alpha=0.3)
+#     # plt.fill_between(np.arange(0, 49), 0, output_amplitude_show, 'r', alpha=0.3)
+#     # # plt.margins(0.1, 0.1)
+#     # plt.xlabel('Frequency', fontsize=20, fontweight='bold')
+#     # plt.ylabel('Amplitude', fontsize=20, fontweight='bold')
+#     # plt.xticks(fontsize=20, fontweight='bold')
+#     # plt.yticks(fontsize=20, fontweight='bold')
+#     # # plt.ylim(0, 3)
+#     # plt.grid(True)
+#     # # plt.show()
+#     # plt.savefig("1.pdf", bbox_inches='tight')
+#     # return
+
+#     # orignal = np.load("true.npy")
+#     x = np.arange(95, 192, 1)
+#     y = np.arange(95, 192, 1)
+#     z = np.arange(0, 96, 1)
+#     m = np.arange(95, 192, 1)
+#     # plt.rcParams['font.sans-serif'] = ['Arial']
+#     plt.rcParams['font.size'] = 18
+#     plt.figure(figsize=(12, 4))
+#     plt.grid(linestyle="--")
+
+#     plt.plot(y, true[95:192], label='GroundTruth', linewidth=4, color='red')
+#     tmp = preds[95:192] + 0.2 + np.random.uniform(-0.05, 0.05, size=(97)) #- np.random.uniform(-0.002, 0.002, size=(97))
+#     # tmp[1:] = tmp[1:] - 0.0015
+#     plt.plot(m, tmp, label='iTransformer', linewidth=4, color='grey')
+#     if preds is not None:
+#         plt.plot(x, preds[95:192], label='FilterNet', linewidth=4, color='orange')
+#     plt.plot(z, true[0:96], label='InputData', linewidth=4)
+#     plt.xlabel("Time", fontsize=20, fontweight='bold')
+#     plt.ylabel("Values", fontsize=20, fontweight='bold')
+#     # plt.ylim(1.2, 1.9)
+#     plt.xticks(fontsize=20, fontweight='bold')
+#     plt.yticks(fontsize=20, fontweight='bold')
+#     plt.legend(loc = 'upper left')
+#     plt.savefig(name, bbox_inches='tight')
+
 def visual(true, preds=None, name='./pic/test.pdf'):
     """
-    Results visualization
+    Results visualization (Dynamic Length Version)
     """
-    # # plt.figure()
-    # return np.save("true.npy", true[0:96])
-    # true = np.load('true.npy')
-    # fourier = np.fft.rfft(true[0:96])
-    # # fourier_out = fourier_1-fourier
-    # # fourier = np.fft.fft(imp)
-    # n = true[0:96].size
-    # time_step = 0.01
-    # freq = np.fft.fftfreq(n, d=time_step)
-    # # plt.plot(freq, fourier.real)
-    # output_amplitude_show = np.abs(fourier)
-    # # output_phase_show = np.angle(fourier)
-    # # plt.plot(freq, output_phase_show)
-    # # plt.rcParams['font.sans-serif'] = ['Arial']
-    # # plt.rcParams['font.size'] = 18
-    # # output_amplitude_show[0] = 7
-    # # output_amplitude_show[1] = 4.3
-    # # output_amplitude_show[4] = 1.3
-    # plt.figure(figsize=(12, 4))
-    # plt.grid(linestyle="--")
-    # plt.plot(np.arange(0, 49), output_amplitude_show, label='Spectrum', linewidth=0.1, alpha=0.3)
-    # plt.fill_between(np.arange(0, 49), 0, output_amplitude_show, 'r', alpha=0.3)
-    # # plt.margins(0.1, 0.1)
-    # plt.xlabel('Frequency', fontsize=20, fontweight='bold')
-    # plt.ylabel('Amplitude', fontsize=20, fontweight='bold')
-    # plt.xticks(fontsize=20, fontweight='bold')
-    # plt.yticks(fontsize=20, fontweight='bold')
-    # # plt.ylim(0, 3)
-    # plt.grid(True)
-    # # plt.show()
-    # plt.savefig("1.pdf", bbox_inches='tight')
-    # return
-
-    # orignal = np.load("true.npy")
-    x = np.arange(95, 192, 1)
-    y = np.arange(95, 192, 1)
-    z = np.arange(0, 96, 1)
-    m = np.arange(95, 192, 1)
-    # plt.rcParams['font.sans-serif'] = ['Arial']
-    plt.rcParams['font.size'] = 18
-    plt.figure(figsize=(12, 4))
-    plt.grid(linestyle="--")
-
-    plt.plot(y, true[95:192], label='GroundTruth', linewidth=4, color='red')
-    tmp = preds[95:192] + 0.2 + np.random.uniform(-0.05, 0.05, size=(97)) #- np.random.uniform(-0.002, 0.002, size=(97))
-    # tmp[1:] = tmp[1:] - 0.0015
-    plt.plot(m, tmp, label='iTransformer', linewidth=4, color='grey')
+    plt.figure()
+    
+    # 绘制完整的 GroundTruth 曲线
+    plt.plot(true, label='GroundTruth', linewidth=2, color='blue')
+    
+    # 绘制完整的预测曲线
     if preds is not None:
-        plt.plot(x, preds[95:192], label='FilterNet', linewidth=4, color='orange')
-    plt.plot(z, true[0:96], label='InputData', linewidth=4)
-    plt.xlabel("Time", fontsize=20, fontweight='bold')
-    plt.ylabel("Values", fontsize=20, fontweight='bold')
-    # plt.ylim(1.2, 1.9)
-    plt.xticks(fontsize=20, fontweight='bold')
-    plt.yticks(fontsize=20, fontweight='bold')
-    plt.legend(loc = 'upper left')
+        plt.plot(preds, label='Prediction', linewidth=2, color='red', alpha=0.8)
+        
+    plt.legend()
+    plt.tight_layout()
     plt.savefig(name, bbox_inches='tight')
-   
+    plt.close()
    
 def attn_map(attn, path='./pic/attn_map.pdf'):
     """
