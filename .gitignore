@@ -9,12 +9,11 @@ checkpoints/*
 *.pt
 *.ckpt
 
-# # Logs and experiment outputs
-# logs/
-# *.log
-# *.out
-# results/
-# test_results/
-# vis/
-# prototypes/
-# result_long_term_forecast.txt
+# Logs and experiment outputs
+logs/
+*.log
+*.out
+results/
+test_results/
+prototypes/
+result_long_term_forecast.txt
