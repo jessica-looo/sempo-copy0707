@@ -35,6 +35,7 @@ python run.py \
   --d_layers 3 \
   --percent 100 \
   --train_epochs 100 \
+  --relation_early_stop_epoch 15 \
   --batch_size 16 \
   --domain_len 128 \
   --d_model 256 \
@@ -50,6 +51,8 @@ python run.py \
   --support_ratio 0.66 \
   --x_data_path "chem/chem.csv" \
   --y_data_path "accum/accum_100y.csv" \
+  --use_pair_diff 0 \
+  --use_pair_product 1 \
   --relation_pretrain_samples_per_site 8 \
   --relation_loss_site_weight 1.0 \
   --relation_loss_aug_weight 0.5 \

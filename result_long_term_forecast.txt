@@ -1565,3 +1565,75 @@ PeakRecall@10%_±2: 0.3542
 PeakPrecision@10%_±2: 0.3542
 PeakF1@10%_±2: 0.3542
 
+long_term_forecast_SEMPO_chem_accum_crossvar_protoprototypes/chem_accum_crossvar_relation_pretrain_proto_k3.npz_ftM_sl32_ll48_pl32_pl16_dm256_nh2_el3_dl3_df128_fc1_ebtimeF_dtTrue_0  
+mse: 0.1306, mae: 0.2751
+corr: 0.0606
+corr_smooth_3: 0.0659
+a3_corr: 0.0797
+trend_corr: 0.0278
+direction_acc: 49.3%
+lag_corr@±2: 0.0619, best_lag: 1
+PeakRecall@10%_±2: 0.4722
+PeakPrecision@10%_±2: 0.4722
+PeakF1@10%_±2: 0.4722
+
+long_term_forecast_SEMPO_chem_accum_crossvar_protoprototypes/chem_accum_crossvar_relation_pretrain_proto_k3.npz_ftM_sl32_ll48_pl32_pl16_dm256_nh2_el3_dl3_df128_fc1_ebtimeF_dtTrue_0  
+mse: 0.1245, mae: 0.2649
+corr: 0.0944
+corr_smooth_3: 0.0851
+a3_corr: 0.0788
+trend_corr: 0.0876
+direction_acc: 51.3%
+lag_corr@±2: 0.0944, best_lag: 0
+PeakRecall@10%_±2: 0.4306
+PeakPrecision@10%_±2: 0.4306
+PeakF1@10%_±2: 0.4306
+
+long_term_forecast_SEMPO_chem_accum_crossvar_protoprototypes/chem_accum_crossvar_relation_pretrain_proto_k3.npz_ftM_sl32_ll48_pl32_pl16_dm256_nh2_el3_dl3_df128_fc1_ebtimeF_dtTrue_0  
+mse: 0.1839, mae: 0.3307
+corr: -0.0099
+corr_smooth_3: -0.0373
+a3_corr: -0.0923
+trend_corr: 0.0159
+direction_acc: 49.3%
+lag_corr@±2: 0.0022, best_lag: 1
+PeakRecall@10%_±2: 0.4306
+PeakPrecision@10%_±2: 0.4306
+PeakF1@10%_±2: 0.4306
+
+long_term_forecast_SEMPO_chem_accum_crossvar_protoprototypes/chem_accum_crossvar_relation_pretrain_proto_k3.npz_ftM_sl32_ll48_pl32_pl16_dm256_nh2_el3_dl3_df128_fc1_ebtimeF_dtTrue_0  
+mse: 0.1839, mae: 0.3307
+corr: -0.0099
+corr_smooth_3: -0.0373
+a3_corr: -0.0923
+trend_corr: 0.0159
+direction_acc: 49.3%
+lag_corr@±2: 0.0022, best_lag: 1
+PeakRecall@10%_±2: 0.4306
+PeakPrecision@10%_±2: 0.4306
+PeakF1@10%_±2: 0.4306
+
+long_term_forecast_SEMPO_chem_accum_crossvar_protoprototypes/chem_accum_crossvar_relation_pretrain_proto_k3.npz_ftM_sl32_ll48_pl32_pl16_dm256_nh2_el3_dl3_df128_fc1_ebtimeF_dtTrue_0  
+mse: 0.1839, mae: 0.3307
+corr: -0.0099
+corr_smooth_3: -0.0373
+a3_corr: -0.0923
+trend_corr: 0.0159
+direction_acc: 49.3%
+lag_corr@±2: 0.0022, best_lag: 1
+PeakRecall@10%_±2: 0.4306
+PeakPrecision@10%_±2: 0.4306
+PeakF1@10%_±2: 0.4306
+
+long_term_forecast_SEMPO_chem_accum_crossvar_protoprototypes/chem_accum_crossvar_relation_pretrain_proto_k3.npz_ftM_sl32_ll48_pl32_pl16_dm256_nh2_el3_dl3_df128_fc1_ebtimeF_dtTrue_0  
+mse: 0.1884, mae: 0.3355
+corr: -0.0214
+corr_smooth_3: -0.0505
+a3_corr: -0.1082
+trend_corr: 0.0089
+direction_acc: 49.1%
+lag_corr@±2: -0.0117, best_lag: 1
+PeakRecall@10%_±2: 0.4444
+PeakPrecision@10%_±2: 0.4444
+PeakF1@10%_±2: 0.4444
+

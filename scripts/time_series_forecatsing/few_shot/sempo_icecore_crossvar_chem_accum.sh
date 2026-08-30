@@ -61,7 +61,7 @@ torchrun --nnodes=1 --nproc_per_node=1 --master_port=29503 run.py \
   --filter_approx \
   --wavelet_loss_weight 0.1 \
   --wavelet_band_weights "0.5,0.2,0.2,0.5" \
-  --pearson_loss_weight 0.1 \
+  --pearson_loss_weight 1 \
   --freddf_loss_weight 0.1 \
   --soft_dtw_loss_weight 0.05 \
   --soft_dtw_gamma 0.1 \
@@ -72,6 +72,8 @@ torchrun --nnodes=1 --nproc_per_node=1 --master_port=29503 run.py \
   --y_data_path "accum/accum_100y.csv" \
   --target_anchor_residual \
   --target_anchor_len 16 \
+  --use_pair_diff 0 \
+  --use_pair_product 1 \
   --use_context_memory \
   --context_memory_gate_init -2.0 \
   --context_memory_tokens 16 \

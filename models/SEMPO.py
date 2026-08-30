@@ -135,8 +135,8 @@ class Model(nn.Module):
             nn.ReLU()
         )
 
-        nn.init.zeros_(self.temporal_mask_net[0].weight)
-        nn.init.constant_(self.temporal_mask_net[0].bias, -0.01)
+        nn.init.ones_(self.temporal_mask_net[0].weight)
+        nn.init.constant_(self.temporal_mask_net[0].bias, 1)
 
         # [修改点 1-C] 增加极简趋势预测头 (绕过 Transformer)
         self.trend_projection = nn.Sequential(
