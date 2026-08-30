@@ -14,9 +14,9 @@ num_prototypes=3
 
 # Pair-interaction ablation for relation representation.
 # Defaults keep the previous full feature set: [zx, zy, zy-zx, zx*zy].
-use_pair_diff=${use_pair_diff:-1}
+use_pair_diff=${use_pair_diff:-0}
 use_pair_product=${use_pair_product:-1}
-if [ "$use_pair_diff" = "0" ] && [ "$use_pair_product" = "1" ]; then
+if [ "$use_pair_diff" = "1" ] && [ "$use_pair_product" = "1" ]; then
   pair_suffix=""
 else
   pair_suffix="_pair_d${use_pair_diff}_p${use_pair_product}"
@@ -76,6 +76,4 @@ python run.py \
   --prototype_cluster_interval 2 \
   --prototype_momentum 0.9 \
   --prototype_temperature 0.2 \
-  --use_pair_diff 0 \
-  --use_pair_product 1 \
   --prototype_output_path prototypes/d18O_accum_crossvar_relation_pretrain_proto_k${num_prototypes}${pair_suffix}.npz

@@ -36,7 +36,7 @@ python run.py \
   --percent 100 \
   --train_epochs 100 \
   --relation_early_stop_epoch 15 \
-  --batch_size 16 \
+  --batch_size 64 \
   --domain_len 128 \
   --d_model 256 \
   --learning_rate 1e-4 \
@@ -53,7 +53,7 @@ python run.py \
   --y_data_path "accum/accum_100y.csv" \
   --use_pair_diff 0 \
   --use_pair_product 1 \
-  --relation_pretrain_samples_per_site 8 \
+  --relation_pretrain_samples_per_site 24 \
   --relation_loss_site_weight 1.0 \
   --relation_loss_aug_weight 0.5 \
   --relation_loss_xy_weight 0.1 \
@@ -64,6 +64,6 @@ python run.py \
   --num_prototypes $num_prototypes \
   --prototype_warmup_epochs 5 \
   --prototype_cluster_interval 2 \
-  --prototype_momentum 0.9 \
+  --prototype_momentum 0.5 \
   --prototype_temperature 0.2 \
   --prototype_output_path prototypes/chem_accum_crossvar_relation_pretrain_proto_k${num_prototypes}.npz

@@ -90,11 +90,9 @@ torchrun --nnodes=1 --nproc_per_node=1 --master_port=29503 run.py \
   --context_memory_gate_init -2.0 \
   --context_memory_tokens 16 \
   --context_memory_dropout 0.1 \
-  --use_pair_diff ${use_pair_diff} \
-  --use_pair_product ${use_pair_product} \
   --relation_pretrain_checkpoint checkpoints/${relation_pretrain_setting}/checkpoint.pth \
   --use_encoder_proto_static \
   --use_old_cluster_onehot \
-  --use_pair_diff 0 \
-  --use_pair_product 1 \
+  --use_pair_diff $use_pair_diff \
+  --use_pair_product $use_pair_product \
   --encoder_proto_path prototypes/d18O_accum_crossvar_relation_pretrain_proto_k${num_prototypes}${pair_suffix}.npz

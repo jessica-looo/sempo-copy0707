@@ -470,7 +470,8 @@ class Model(nn.Module):
         # 4. 时序聚焦 (全分支统一处理)
         x_mra_flat = x_mra.view(-1, 1, seq_len)  # 展平以便通过 Conv1d
         time_mask = self.temporal_mask_net(x_mra_flat)
-        x_mra_focused = x_mra_flat * time_mask
+        # x_mra_focused = x_mra_flat * time_mask
+        x_mra_focused = x_mra_flat
         
         # 5. 恢复 4D 结构以兼容原 SEMPO
         # [freq_num * bs * n_vars, 1, seq_len] -> [freq_num, bs, n_vars, seq_len]

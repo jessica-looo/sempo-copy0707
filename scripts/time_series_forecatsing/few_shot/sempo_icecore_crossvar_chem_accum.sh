@@ -12,8 +12,16 @@ seq_len=32
 patch_len=16
 stride=8
 num_prototypes=3
-relation_pretrain_setting=long_term_forecast_SEMPO_chem_accum_crossvar_relation_pretrain_k${num_prototypes}_sl${seq_len}_dm256_el3_0
+use_pair_diff=0
+use_pair_product=1
 
+if [ "$use_pair_diff" -eq 1 ] && [ "$use_pair_product" -eq 1 ]; then
+  pair_suffix=""
+else
+  pair_suffix="_pair_d${use_pair_diff}_p${use_pair_product}"
+fi
+
+relation_pretrain_setting=long_term_forecast_SEMPO_chem_accum_crossvar_relation_pretrain_k${num_prototypes}_sl${seq_len}_dm256_el3${pair_suffix}_0
 
 torchrun --nnodes=1 --nproc_per_node=1 --master_port=29503 run.py \
   --task_name long_term_forecast \
@@ -43,7 +51,7 @@ torchrun --nnodes=1 --nproc_per_node=1 --master_port=29503 run.py \
   --domain_len 128 \
   --d_model 256 \
   --learning_rate 1e-3 \
-  --loss MSE \
+  --loss MAE \
   --warmup_steps 1000 \
   --lradj constant_with_warmup \
   --head_type prediction \
@@ -59,11 +67,11 @@ torchrun --nnodes=1 --nproc_per_node=1 --master_port=29503 run.py \
   --inner_lr 5e-3 \
   --meta_lr 5e-5 \
   --filter_approx \
-  --wavelet_loss_weight 0.1 \
+  --wavelet_loss_weight 0 \
   --wavelet_band_weights "0.5,0.2,0.2,0.5" \
-  --pearson_loss_weight 1 \
-  --freddf_loss_weight 0.1 \
-  --soft_dtw_loss_weight 0.05 \
+  --pearson_loss_weight 0 \
+  --freddf_loss_weight 0 \
+  --soft_dtw_loss_weight 0 \
   --soft_dtw_gamma 0.1 \
   --soft_dtw_band 2 \
   --soft_dtw_normalize 1 \
@@ -72,12 +80,13 @@ torchrun --nnodes=1 --nproc_per_node=1 --master_port=29503 run.py \
   --y_data_path "accum/accum_100y.csv" \
   --target_anchor_residual \
   --target_anchor_len 16 \
-  --use_pair_diff 0 \
-  --use_pair_product 1 \
+  --use_pair_diff $use_pair_diff \
+  --use_pair_product $use_pair_product \
   --use_context_memory \
   --context_memory_gate_init -2.0 \
   --context_memory_tokens 16 \
   --context_memory_dropout 0.1 \
-  --relation_pretrain_checkpoint checkpoints/${relation_pretrain_setting}/checkpoint.pth \
   --use_encoder_proto_static \
-  --encoder_proto_path prototypes/chem_accum_crossvar_relation_pretrain_proto_k${num_prototypes}.npz
+  --encoder_proto_path prototypes/chem_accum_crossvar_relation_pretrain_proto_k${num_prototypes}.npz \
+  --relation_pretrain_checkpoint checkpoints/${relation_pretrain_setting}/checkpoint.pth \
+

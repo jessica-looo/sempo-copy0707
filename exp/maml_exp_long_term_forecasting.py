@@ -741,10 +741,10 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                             if grad is None and not name.startswith('memory_'):
                                 dead_tensors.append(name)
                         
-                        if len(dead_tensors) > 0:
-                            print("\n以下参数未参与梯度计算：")
-                            for name in dead_tensors:
-                                print(f"  - {name}")
+                        # if len(dead_tensors) > 0:
+                        #     print("\n以下参数未参与梯度计算：")
+                        #     for name in dead_tensors:
+                        #         print(f"  - {name}")
                         # import pdb;pdb.set_trace()
 
                         # =======================================================
