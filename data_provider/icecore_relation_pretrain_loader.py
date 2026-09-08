@@ -12,7 +12,7 @@ from data_provider.data_processing import (
     clean_site_name,
     compute_detrended_spearman,
     filter_valid_sites_pair,
-    fit_global_scaler_from_sites,
+    fit_crossvar_scalers_from_support,
     fit_static_scaler,
     get_common_sites,
     get_static_scaled,
@@ -98,8 +98,23 @@ class Dataset_IceCore_RelationPretrain(Dataset):
         )
 
         self.site_meta_dict = load_site_meta(self.site_meta_path)
-        self.x_scaler = fit_global_scaler_from_sites(df_x_data, valid_sites, year_col='year') if self.scale else None
-        self.y_scaler = fit_global_scaler_from_sites(df_y_data, valid_sites, year_col='year') if self.scale else None
+        self.support_len_map = {}
+        if self.scale:
+            (
+            self.x_scaler,
+            self.y_scaler,
+            self.support_len_map,
+            ) = fit_crossvar_scalers_from_support(
+                df_x=df_x_data,
+                df_y=df_y_data,
+                sites=valid_sites,
+                seq_len=self.seq_len,
+                support_ratio=self.support_ratio,
+                year_col='year',
+            )
+        else:
+            self.x_scaler = None
+            self.y_scaler = None
         self.static_scaler = fit_static_scaler(valid_sites, self.site_meta_dict)
 
         df_x_scaled = df_x_data.copy()
@@ -127,7 +142,7 @@ class Dataset_IceCore_RelationPretrain(Dataset):
             years, x_vals, y_vals = align_two_site_series(df_x_scaled, df_y_scaled, site, year_col='year')
             _, x_raw, y_raw = align_two_site_series(df_x_data, df_y_data, site, year_col='year')
 
-            history_len = self._history_len(len(x_vals))
+            history_len = self.support_len_map.get(site, self._history_len(len(x_vals)))
             if history_len < self.seq_len:
                 continue
 

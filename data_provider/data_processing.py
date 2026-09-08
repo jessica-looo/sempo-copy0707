@@ -562,6 +562,64 @@ def fit_global_scaler_from_sites(df, train_sites, year_col='year'):
 
     return scaler
 
+def fit_crossvar_scalers_from_support(
+    df_x,
+    df_y,
+    sites,
+    seq_len,
+    support_ratio,
+    year_col='year',
+):
+    """
+    只使用所有指定站点的 support 段拟合 x/y scaler。
+
+    每个站点：
+        1. 按共同年份对齐 x/y；
+        2. 取前 support_ratio 比例；
+        3. query 段不参与 scaler.fit。
+    """
+    x_support_values = []
+    y_support_values = []
+
+    support_len_map = {}
+
+    for site in sites:
+        _, x_vals, y_vals = align_two_site_series(
+            df_x=df_x,
+            df_y=df_y,
+            site=site,
+            year_col=year_col,
+        )
+
+        total_len = len(x_vals)
+
+        if support_ratio is None:
+            support_len = min(100, total_len)
+        else:
+            support_len = int(total_len * float(support_ratio))
+            support_len = max(int(seq_len), support_len)
+            support_len = min(support_len, total_len)
+
+        support_len_map[site] = support_len
+
+        if support_len > 0:
+            x_support_values.append(x_vals[:support_len])
+            y_support_values.append(y_vals[:support_len])
+
+    x_scaler = StandardScaler()
+    y_scaler = StandardScaler()
+
+    if x_support_values:
+        x_scaler.fit(np.vstack(x_support_values))
+    else:
+        x_scaler.fit(np.zeros((1, 1), dtype=np.float32))
+
+    if y_support_values:
+        y_scaler.fit(np.vstack(y_support_values))
+    else:
+        y_scaler.fit(np.zeros((1, 1), dtype=np.float32))
+
+    return x_scaler, y_scaler, support_len_map
 
 def transform_site_series(df_site, site, scaler=None, scale=True):
     """

@@ -1,0 +1,155 @@
+# id: https://doi.org/10.5285/9e0ed16e-f2ab-4372-8df3-fde7e388c9a7
+# title: CLIVASH2k Antarctic ice core chemistry database
+# summary: This data compilation is a collaborative effort by the CLIVASH2k (Climate Variability in Antarctica and the Southern Hemisphere over the past 2000 years) working group, part of the PAGES2k network. The database is a compilation of sodium and sulphate records from Antarctic ice cores spanning the past 2000 years, and contains a combination of published records (sourced from public archives), and unpublished data submitted to the CLIVASH2k call.
+# : All data are provided as annual averages (Jan-Dec). This database includes the annually resolved section of each original dataset (in the annual_resolution folder) and the coarser than annual sections (in the coarse_resolution folder). Annual averages for the oldest and most recent years were only included if the available data covered more than half of the year. All concentration values are presented in parts per billion (ppb). All flux values are presented in ppb by kilogram per square meter (ppb kg m-2). Data for each species are contained in separate CSV files; Sodium concentration (Na_concentration), Sodium flux (Na_flux), Sulphate concentration (SO4_concentration), Sulphate flux (SO4_flux), Excess Sulphate (xsSO4), Excess Sulphate flux (xsSO4_flux). Each file contains the data for all sites. The Excess Sulphate and Excess Sulphate flux calculations assume that all Na comes from the ocean (according to the standard seawater ion ratio as in [Holland, 1978]). Data were submitted in both the ionic (e.g. SO42-) and elemental forms (S). Elemental S has been converted to sulphate (SO42-) by multiplying by three.
+# : A data description publication accompanies this database: Thomas et al., (to be submitted) The CLIVASH2k ice core chemistry database: an Antarctic compilation of sodium and sulphate records spanning the past 2000 years. Earth System Science Data.
+# acknowledgement: This database was created with the support of the CLIVASH2k project.
+# keywords: Antarctica,CLIVASH2k,concentration,flux,ice core,sodium,sulphate
+# history: Datasets presented in this database were gathered as part of a collaborative process which included assembling the database (including quality control and validation) and outlining the structure and contents of the database (including data selection criteria, metadata, and chronological information). The target time-period for this database was the last 2000 years. Records of any length could be submitted within this time-period. This includes snow-pits and firn cores, spanning just a few seasons to years. Data were requested at the highest resolution available and converted to annual averages based on the original age-scale provided by the data contributors.
+# : All data were converted to ppb (concentration) and ppb kg m-2 (flux). The Excess Sulphate and Excess Sulphate flux calculations assume that all Na comes from the ocean (according to the standard seawater ion ratio as in [Holland, 1978]). Data were submitted in both the ionic (e.g. SO42-) and elemental forms (S). Elemental S has been converted to sulphate (SO42-) by multiplying by three.
+# comment: -999.99, "NaN" and "zero" values were removed from the original datasets before calculating annual and coarser than annual averages. Annual averages for the oldest and most recent years were only included if the available data covered more than half of the year. Any missing numerical values are then represented as -999.99.
+# : In the metadata table that describes the site information and references for the original contributing datasets, missing text values (e.g. dates) are represented as "N/A". The oldest and most recent years reported in the metadata table are based on the longest timespan among all species for each dataset. Flux records from some sites cover a shorter timespan due to shorter accumulation datasets.
+# license: http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+# institution: British Antarctic Survey
+# authors: Elizabeth Thomas,Diana Vladimirova,Dieter Tetzner
+# project: CLIVASH2k https://pastglobalchanges.org/science/wg/2k-network/projects/clivash/intro
+# references: Thomas, E. R., Vladimirova, D. O., Tetzner, D. R., Emanuelsson, B. D., Chellman, N., Dixon, D. A., Goosse, H., Grieman, M. M., King, A. C. F., Sigl, M., Udy, D. G., Vance, T. R., Winski, D. A., Winton, V. H. L., Bertler, N. A. N., Hori, A., Laluraj, C. M., McConnell, J. R., Motizuki, Y., Takahashi, K., Motoyama, H., Nakai, Y., Schwanck, F., Simões, J. C., Lindau, F. G. L., Severi, M., Traversi, R., Wauthy, S., Xiao, C., Yang, J., Mosely-Thompson, E., Khodzher, T. V., Golobokova, L. P., and Ekaykin, A. A.: Ice core chemistry database: an Antarctic compilation of sodium and sulfate records spanning the past 2000 years, Earth Syst. Sci. Data, 15, 2517–2532, https://doi.org/10.5194/essd-15-2517-2023, 2023.
+# : Holland H. D. (1978). The chemistry of the atmosphere and oceans. New York, Wiley-Interscience. ISBN: 9780471035091
+# citation: Thomas, E., Vladimirova, D., & Tetzner, D. (2022). CLIVASH2k Antarctic ice core chemistry database (Version 1.0) [Data set]. NERC EDS UK Polar Data Centre. https://doi.org/10.5285/9e0ed16e-f2ab-4372-8df3-fde7e388c9a7
+# publisher_name: NERC EDS UK Polar Data Centre
+# publisher_type: institution
+# publisher_email: pdc@bas.ac.uk
+# publisher_url: https://www.bas.ac.uk/data/uk-pdc/
+# time_coverage_start: 0
+# time_coverage_end: 2019
+# time_coverage_note: When using data corresponding to year 0, these should be interpreted as year -1 CE.
+# geospatial_lon_min: -162 (degree_east)
+# geospatial_lon_max: 170 (degree_east)
+# geospatial_lat_min: -90 (degree_north)
+# geospatial_lat_max: -54 (degree_north)
+# geospatial_bounds_crs: EPSG:4326
+# geospatial_vertical_min: 48 (m a.s.l.)
+# geospatial_vertical_max: 3810 (m a.s.l.)
+# geospatial_vertical_positive: up
+# geospatial_bounds_vertical_crs: EPSG:5829
+# data_type: metadata annual
+# missing_value: N/A
+# notes: This table contains the site name, site geographical information (latitude, longitude, elevation), record timespan (oldest and youngest years), and original reference for the contributing datasets. Timespans of non-annually resolved datasets are labeled as N/A. Records listed as "this study" are previously unpublished. Cite the data paper when using these data.
+Name,Latitude (degree_north),Longitude (degree_east),Elevation (m a.s.l.),Oldest year CE,Most recent year CE,Reference
+105km,-67.43,93.383,1416,1774,1981,this study
+ABN_13/14_snowpit,-71.17,110.37335,2964,2004,2013,"Winton and Edwards, 2020 (unreleased data)"
+B40,-75.00,0.06,2892,0,2012,S data: Sigl et al. 2014; Na data: unpublished; Dating: Sigl et al. 2015
+BER11C95_25,-79.61,-45.72433,886,957,1992,Ruth et al 2004
+BH-2,-78.47,106.8,3488,0,1541,this study
+BH-1,-78.47,106.8,3488,1520,1541,this study
+Bouvet Island,-54.42,3.390833,350,2001,2016,"King et al. 2019; Thomas et al., 2021"
+Bruce Plateau,-66.03,-64.07,1975,1400,2009,Unpublished (co-author Ellen Mosely-Thompson)
+cDML,-71.33,11.583,1300,1904,2006,Rahaman et al. 2016
+CWA_a_2013,-82.37,-119.2855,950,1939,1993,Reusch et al. 1999
+CWA_d_2013,-81.37,-107.275,1930,1952,1993,Reusch et al. 1999
+DF01,-77.37,39.7,3810,607,1903,Motizuki et al. 2017
+DFS10,-77.40,39.62,3800,0,2009,Sigl et al. 2014 (SO4)
+DIR,-70.23,26.3349,450,1752,2011,Philippe et al. 2016
+DIV2010,-77.95,-95.96,1329,1785,2010,"S: Sigl et al. 2014. Na: Crisitiello et al., J Clim, 2014"
+DML03C98_09(FB9809),-74.50,1.960833,2843,1731,1996,Sommer et al. 2000
+DML05,-75.00,0.02,2892,150,1998,Traufetter et al. 2004
+DML07,-75.58,3.43,2680,454,1996,Traufetter et al. 2004
+DML15C98_14(FB9814),-75.08,2.501,2970,1766,1996,Sommer et al. 2000
+DML17C98_33(B33),-75.17,6.4985,3160,0,1996,Sommer et al. 2000
+DSS0506,-66.77,112.80711,1370,1927,1989,Vallelonga et al. 2016
+DT401,-79.02,77,3760,0,1998,Ren et al. 2010; Li et al. 2015
+EDC,-75.10,123.35,3233,N/A,N/A,Wolff et al. 2006; Wolff et al. 2010
+EDC_50y,-75.10,123.35,3233,N/A,N/A,Röthisberger et al. 2005
+EPICA DC,-75.10,123.35,3233,N/A,N/A,Fischer et al. 2007 (PANGAEA)
+EPICA DomeC,-75.10,123.35,3233,N/A,N/A,Castellano et al. 2004; Fujita et al. 2015
+EDC96,-75.10,123.35,3232,1,1907,"Castellano et al. 2005; Sigl et al., 2014"
+EDML,-75.00,0.0684,2892,N/A,N/A,Fischer et al. 2007 (PANGAEA)
+Ferrigno,-74.57,-86.9,1354,1703,2010,Thomas et al. 2013; 2015
+FIS_BI,-70.40,-3.03,394,1996,2012,Vega et al. 2018 (PANGAEA)
+FIS_KC,-70.52,2.95,264,1958,2007,Vega et al. 2018 (PANGAEA)
+FIS_KM,-70.13,1.2,268,1995,2012,Vega et al. 2018 (PANGAEA)
+FIS_S100,-70.23,4.8,48,1737,1999,Vega et al. 2018 (PANGAEA)
+GIP icp-ms,-79.97,160.2,380,2000,2007,this study
+GIP ic,-79.97,160.2,380,2000,2007,Na - this study; SO4 - Markle et al. 2012; Markle 2012 (MSc Thesis)
+Gomez,-73.59,-70.36,1400,1854,2006,Thomas et al. 2008; 2009
+H15,-69.08,40.78,1050,1632,1991,Kohno et al. (1996); Nishikiori et al. (1997); Kawamura et al. (1997); Kohno et al. (1999); Kawamura et al. 2000); Machida et al. (1995); Kohno et al. (2002)
+IC-06,-81.05,-79.835861,750,1935,2002,Schwanck et al. 2014
+ISO-ICE_spa,-75.00,0.07545,2892,2009,2016,Winton et al. 2019
+ISO-ICE_spb,-75.00,0.07545,2892,2008,2016,Winton et al. 2019
+ITASE-00-1,-79.38,-111.239,1791,1653,2000,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-00-2,-78.73,-111.497,1675,1987,2000,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-00-3,-78.43,-115.917,1742,1888,2000,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-00-4,-78.08,-120.076,1697,1798,2000,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-00-5,-77.68,-123.995,1828,1715,2000,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-01-1,-79.16,-104.967,1842,1857,2001,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-01-2,-77.84,-102.91,1336,1889,2001,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-01-3,-78.12,-95.6463,1620,1858,2001,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-01-4,-77.61,-92.2483,1483,1863,2001,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-01-5,-77.06,-89.1376,1239,1779,2001,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-01-6,-76.10,-89.0177,1228,1977,2000,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-02-1,-82.00,-110.008,1746,1783,2002,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-02-4,-86.50,-107.99,2586,1593,2002,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-02-5,-88.00,-107.983,2745,1967,2002,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-02-6,-89.93,144.3938,2808,1911,1996,"Mayewski, P. A. et al. (2010) ""Ion Concentrations from SPRESSO Ice Core, Antarctica"" U.S. Antarctic Program (USAP) Data Center. doi: https://doi.org/10.7265/N508638J."
+ITASE-02-7,-89.00,59.9744,3000,1900,2002,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-03-1,-86.84,95.31,3124,1768,2003,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-03-3,-82.08,101.96,3444,1737,1965,Mayewski and Dixon 2005 (NSIDC - digital media)
+ITASE-99-1,-80.62,-122.63,1350,1723,1999,Mayewski and Dixon 2005 (NSIDC - digital media)
+Jurassic,-74.30,-73.05,1139,1874,2011,"this study, (Thomas and Bracegirdle., 2015), Tetzner et al. (2022), Emanuelsson et al. (2022)"
+LawDome_DSS,-66.77,112.8069,1370,0,2016,"this study, (Jong et al. (in prep))"
+LGB69,-70.83,77.067,1850,1708,2001,Li et al. 2012; Yang et al. 2018
+MES2012 ic,-77.52,167.6765,1600,1794,2006,Rhodes et al. 2012
+MES2012 icp-ms,-77.52,167.6765,1600,1473,2006,Rhodes et al. 2012
+MI0910,-65.55,100.785,500,1913,2009,Inoue et al. 2017 (AADC)
+Mount Johns,-79.92,-94.388361,2100,1883,2008,Schwanck et al. 2017; Thoen et al. 2018
+NFL-1,-77.09,95.37891,3760,1997,2007,Khodzher et al. 2020
+NUS07-1,-73.72,7.98,3174,1754,2007,"S and Na data, and dating: Pasteris et al., JGR, 2014 (doi.org/10.1002/2013JD020377)."
+NUS07-2,-76.07,22.47,3582,336,1993,"S and Na data: Pasteris et al., JGR, 2014 (doi.org/10.1002/2013JD020377). Dating: Sigl et al. 2014"
+NUS07-5,-78.65,35.63,3619,0,1982,"S and Na data: Pasteris et al., JGR, 2014 (doi.org/10.1002/2013JD020377). Dating: Sigl et al. 2014"
+NUS07-7,-82.07,54.88,3725,5,2007,"S and Na data: Pasteris et al., JGR, 2014 (doi.org/10.1002/2013JD020377). Dating: Sigl et al. 2014"
+NUS08-4,-82.82,18.9,2552,1621,2008,"S and Na data: Pasteris et al., JGR, 2014 (doi.org/10.1002/2013JD020377). Dating: Sigl et al. 2014"
+NUS08-5,-82.63,17.87,2554,346,2000,"S and Na data: Pasteris et al., JGR, 2014 (doi.org/10.1002/2013JD020377). Dating: Sigl et al. 2014"
+NUS08-7,-74.88,1.6,2700,1258,2008,"S and Na data, and dating: Pasteris et al., JGR, 2014 (doi.org/10.1002/2013JD020377)."
+NVFL00,-76.70,102.16673,3530,1977,2009,Khodzher et al. 2020
+NVFL-1,-77.09,95.37891,3760,1774,2007,Khodzher et al. 2020
+Palmer,-73.86,-65.46,1897,1621,2011,this study; Emanuelsson et al. 2022
+PIG2010,-78.00,-96,1593,1918,2009,S: Sigl et al. 2014
+PIG,-78.00,-96,1593,1980,2009,Na: Criscitiello et al. 2014
+PV-10,-72.81,79.934,2800,1976,2009,Osipov et al. 2020
+Rendezvous,-74.45,-78.1656,1006,1843,2011,this study; Emanuelsson et al. 2022
+RICE12-13pit,-79.36,-161.706,500,2011,2012,Winton et al. 2016
+RIDS95A_2013,-78.73,-116.33,1740,1831,1995,Kreutz et al. 2000
+RIDS95B_2013,-79.46,-118.05,1603,1922,1995,Kreutz et al. 2000
+RIDS95C_2013,-80.01,-119.43,1530,1903,1995,Kreutz et al. 2000
+SCH2,-79.55,-84.05,1059,1975,2014,Hoffmann et al. 2020
+SDM1994_2013,-81.65,-148.79,620,1891,1994,Kreutz et al. 1997
+SHIC,-72.67,-99.63,474,1999,2019,Tetzner et al. (in prep)
+SKBL,-74.85,-71.59,1419,1999,2019,Tetzner et al. (in prep)
+SouthPole1995_2013,-90.00,0,2850,1430,1989,Meyerson et al. 2002
+SP01,-89.95,17.67,2835,905,2000,Budner et al. 2003
+SP04C5,-89.95,17.67,2835,176,2004,Ferris et al. 2011
+SP04C6,-89.95,17.67,2835,1073,2004,Ferris et al. 2011
+SPICE,-89.99,-98.16,2835,0,2014,Winski et al. (in review)
+SW-42,-78.74,105.59062,3590,1985,2012,Osipov et al. 2020
+SW-80,-79.01,104.46806,3590,1989,2014,this study
+TA192A__Adelie_Land,-66.78,139.56,602,1997,2015,Goursaud et al. 2019
+TD05,-72.80,159.1,2316,542,1986,Severi et al. 2012; Severi et al. 2017
+TD96,-72.48,159.06,2316,1212,2009,Stenni et al. 2002; Sigl et al. 2014
+TaylorDome,-77.81,158.72,2365,1,1953,Mayewski et al. 1996
+THW2010,-77.00,-121.2,2020,1867,2009,S: Sigl et al. 2014
+THW,-77.00,-121.2,2020,1980,2009,Na: Criscitiello et al. 2014
+UpC_2013,-82.44,-135.97195,525,1870,1995,Mayewski and Dixon 2005 (NSIDC - digital media)
+VFL-1,-78.09,102.8,3570,1806,1888,Khodzher et al. 2020
+vk07,-78.45,106.84,3488,1634,1946,this study
+vk55,-78.45,106.84,3488,1976,2009,Osipov et al. 2020
+VKT55,-78.45,106.84,3488,1854,1972,this study
+VLG,-77.33,162.5331,624,1300,2000,Bertler et al. 2004; Bertler et al. 2005; Bertler et al. 2011
+Vostok5G_icp-ms_hplc,-78.47,106.8,3488,7,1620,this study
+Vostok5G_ic,-78.47,106.8,3488,0,1857,this study
+W10k,-66.75,112.83,1390,1735,2007,S: Sigl et al. 2014. Na: Unpublished
+WDC05Q,-79.46,-112.225,1759,1521,2004,Sigl et al. 2013
+WDC05A,-79.46,-112.225,1759,1774,2005,"Banta, J.R., J.R. McConnell, M. Frey, and K. Taylor (2008), Spatial and temporal variability in snow accumulation at WAIS Divide over recent centuries, J. Geophys. Res. 113, D23102, doi:10.1029/2008JD01235. (doi:10.1029/2008JD010235)"
+WDC06A,-79.47,-112.09,1806,0,2004,Sigl et al. 2013; Sigl et al. 2015
+WHG ic,-72.90,169.083,400,1883,2006,Na - Sinclair et al. 2014; SO4 - this study
+WHG icp-ms,-72.90,169.083,400,1977,2004,Sinclair et al. 2014
+WP,-75.25,163.166,50,N/A,N/A,Bertler 2003 (PhD Thesis); Bertler et al. 2004
