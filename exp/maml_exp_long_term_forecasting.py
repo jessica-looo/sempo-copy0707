@@ -1128,7 +1128,15 @@ class Exp_Long_Term_Forecast(Exp_Basic):
             f.write(metrics_text)
             f.write('\n\n')
 
-        folder_path = './results/' + setting + '/'
+        if self.args.cv_dir:
+            if self.args.fold_id is None:
+                raise ValueError("cv_dir 需要同时指定 fold_id")
+            folder_path = os.path.join(
+                self.args.cv_dir, f"fold_{self.args.fold_id}"
+            ) + "/"
+        else:
+            folder_path = './results/' + setting + '/'
+            
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 

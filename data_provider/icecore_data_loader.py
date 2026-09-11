@@ -33,6 +33,7 @@ class Dataset_IceCore_S(Dataset):
                  encoder_proto_path=None,
                  use_old_cluster_onehot=False,
                  use_pretrain_cluster_onehot=False,
+                 fold_id=None,
                  verbose=True):
 
         # =========================
@@ -56,6 +57,7 @@ class Dataset_IceCore_S(Dataset):
         self.data_path = data_path
         self.site_meta_path = site_meta_path
         self.cluster_result_path = cluster_result_path
+        self.fold_id = fold_id
 
         self.features = features
         self.target = target
@@ -155,6 +157,7 @@ class Dataset_IceCore_S(Dataset):
             seed=2030,
             train_ratio=0.6,
             filter_cid=self.filter_cid,
+            fold_id=self.fold_id,
             preferred_test_site_ranks=preferred_test_site_ranks
         )
 

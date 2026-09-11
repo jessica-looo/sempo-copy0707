@@ -80,6 +80,7 @@ def _get_common_kwargs(args, flag, timeenc):
         'use_old_cluster_onehot': getattr(args, 'use_old_cluster_onehot', False),
         'use_pretrain_cluster_onehot': getattr(args, 'use_pretrain_cluster_onehot', False),
         'verbose': getattr(args, 'verbose', True),
+        'fold_id': getattr(args, 'fold_id', None),  
     }
 
 

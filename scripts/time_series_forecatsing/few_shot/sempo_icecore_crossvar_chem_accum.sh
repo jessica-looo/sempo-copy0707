@@ -89,4 +89,4 @@ torchrun --nnodes=1 --nproc_per_node=1 --master_port=29503 run.py \
   --use_encoder_proto_static \
   --encoder_proto_path prototypes/chem_accum_crossvar_relation_pretrain_proto_k${num_prototypes}.npz \
   --relation_pretrain_checkpoint checkpoints/${relation_pretrain_setting}/checkpoint.pth \
-
+  "$@"

@@ -383,9 +383,25 @@ def split_sites_by_cluster(
     train_ratio=0.6,
     filter_cid=None,
     preferred_test_site_ranks=None,
+    fold_id=None
 ):
+    if fold_id is not None:
+        parts = split_sites_fivefold(
+            valid_sites, cluster_map, fold_id, seed
+        )
+        # 保留原含义：先划分，再按簇过滤。
+        if filter_cid is not None:
+            parts = tuple(
+                [s for s in part
+                 if cluster_map.get(clean_site_name(s), -1) == filter_cid]
+                for part in parts
+            )
+        return parts
+
+    # 下面保留原来的划分代码。
     rng = np.random.RandomState(seed)
-    preferred_test_site_ranks = preferred_test_site_ranks or {}
+    # preferred_test_site_ranks = preferred_test_site_ranks or {}
+    preferred_test_site_ranks = {}
 
     cluster_dict = {}
     for s in valid_sites:
@@ -537,6 +553,50 @@ def log_site_split(
     )
     print("=" * 60)
 
+def split_sites_fivefold(valid_sites, cluster_map, fold_id, seed=2030):
+    import random
+
+    quotas = {
+        (6, 12, 8): [(2, 2, 2), (1, 3, 1), (1, 3, 1),
+                     (1, 2, 2), (1, 2, 2)],
+        (8, 6, 12): [(2, 2, 2), (1, 1, 3), (1, 1, 3),
+                     (2, 1, 2), (2, 1, 2)],
+    }
+
+    if fold_id not in range(5):
+        raise ValueError("fold_id 必须为 0～4")
+
+    sites = list(valid_sites)
+    if len(sites) != 26 or len(set(sites)) != 26:
+        raise ValueError("五折模式要求 26 个不重复的有效站点")
+
+    pools = [
+        sorted(s for s in sites
+               if cluster_map.get(clean_site_name(s), -1) == cid)
+        for cid in range(3)
+    ]
+    counts = tuple(map(len, pools))
+    if counts not in quotas:
+        raise ValueError(f"不支持的簇人数：{counts}")
+
+    groups = [[] for _ in range(5)]
+    rng = random.Random(seed)
+    for cid, pool in enumerate(pools):
+        rng.shuffle(pool)
+        start = 0
+        for group, quota in zip(groups, quotas[counts]):
+            end = start + quota[cid]
+            group.extend(pool[start:end])
+            start = end
+
+    val_id = (fold_id + 1) % 5
+    train = [
+        site
+        for i, group in enumerate(groups)
+        if i not in (fold_id, val_id)
+        for site in group
+    ]
+    return train, groups[val_id], groups[fold_id]
 
 # ------------------------------------------------------------
 # 5. Scaling

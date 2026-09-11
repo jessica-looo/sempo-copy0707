@@ -55,7 +55,8 @@ if __name__ == '__main__':
     parser.add_argument('--pred_seperate', type=str, default=None, help='每个cluster单独预测') #弃用
     parser.add_argument('--filter_cid', type=int, default=None, help='每个cluster单独预测')
     parser.add_argument('--support_ratio', type=float, default=None, help='per-site support比例(如0.66), None=固定100年')
-
+    parser.add_argument("--fold_id", type=int, choices=range(5), default=None)
+    parser.add_argument("--cv_dir", type=str, default=None)
 
 
     # forecasting task
@@ -218,6 +219,8 @@ if __name__ == '__main__':
                 pair_suffix,
                 ii
             )
+            if args.fold_id is not None:
+                setting += f"_fold{args.fold_id}"
             args.setting = setting
             exp = Exp(args)
             print('>>>>>>>start relation pretraining : {}>>>>>>>>>>>>>>>>>>>>>>'.format(setting))
@@ -246,6 +249,8 @@ if __name__ == '__main__':
                     args.embed,
                     args.distil,
                     ii)
+                if args.fold_id is not None:
+                    setting += f"_fold{args.fold_id}"
                 args.setting = setting
                 exp = Exp(args)  # set experiments
 
@@ -274,6 +279,8 @@ if __name__ == '__main__':
                     args.embed,
                     args.distil,
                     ii)
+                if args.fold_id is not None:
+                    setting += f"_fold{args.fold_id}"
                 args.setting = setting
                 exp = Exp(args)  # set experiments
                 print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(setting))
@@ -306,6 +313,8 @@ if __name__ == '__main__':
                     args.embed,
                     args.distil,
                     ii)
+                if args.fold_id is not None:
+                    setting += f"_fold{args.fold_id}"
                 args.setting = setting
                 exp = Exp(args)  # set experiments
                
