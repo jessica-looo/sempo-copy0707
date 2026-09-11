@@ -115,28 +115,28 @@ class Model(nn.Module):
 
         self.wavelet_name = 'haar'  # 推荐使用 db4 或 haar
         self.decomposition_levels = 3  # 分解层级
-        # 每一个层级（A3, D3, D2, D1）分配一个可学习阈值
-        self.wavelet_tau = nn.Parameter(torch.full((self.decomposition_levels + 1,), -1.0))
-        # self.wavelet_tau = nn.Parameter(torch.zeros(self.decomposition_levels + 1))
-        if self.use_static_conditioned_wavelet:
-            self.wavelet_tau_mlp = nn.Sequential(
-                nn.Linear(self.static_emb_dim, 32),
-                nn.GELU(),
-                nn.Linear(32, self.decomposition_levels + 1)
-            )
+        # # 每一个层级（A3, D3, D2, D1）分配一个可学习阈值
+        # self.wavelet_tau = nn.Parameter(torch.full((self.decomposition_levels + 1,), -1.0))
+        # # self.wavelet_tau = nn.Parameter(torch.zeros(self.decomposition_levels + 1))
+        # if self.use_static_conditioned_wavelet:
+        #     self.wavelet_tau_mlp = nn.Sequential(
+        #         nn.Linear(self.static_emb_dim, 32),
+        #         nn.GELU(),
+        #         nn.Linear(32, self.decomposition_levels + 1)
+        #     )
             
-            # 稍微控制一下初始化，让它一开始输出的值接近你之前的 -1.0
-            nn.init.constant_(self.wavelet_tau_mlp[-1].bias, -1.0)
-            nn.init.zeros_(self.wavelet_tau_mlp[-1].weight)
+        #     # 稍微控制一下初始化，让它一开始输出的值接近你之前的 -1.0
+        #     nn.init.constant_(self.wavelet_tau_mlp[-1].bias, -1.0)
+        #     nn.init.zeros_(self.wavelet_tau_mlp[-1].weight)
 
-        # 用于时域聚焦的轻量级卷积掩码网络
-        self.temporal_mask_net = nn.Sequential(
-            nn.Conv1d(1, 1, kernel_size=3, padding=1),
-            nn.ReLU()
-        )
+        # # 用于时域聚焦的轻量级卷积掩码网络
+        # self.temporal_mask_net = nn.Sequential(
+        #     nn.Conv1d(1, 1, kernel_size=3, padding=1),
+        #     nn.ReLU()
+        # )
 
-        nn.init.ones_(self.temporal_mask_net[0].weight)
-        nn.init.constant_(self.temporal_mask_net[0].bias, 1)
+        # nn.init.ones_(self.temporal_mask_net[0].weight)
+        # nn.init.constant_(self.temporal_mask_net[0].bias, 1)
 
         # [修改点 1-C] 增加极简趋势预测头 (绕过 Transformer)
         self.trend_projection = nn.Sequential(
@@ -394,55 +394,43 @@ class Model(nn.Module):
         else:
             coeffs = ptwt.wavedec(x_in, wavelet, level=self.decomposition_levels)
         
-        # 2. 振幅甄别 (软阈值截断)
-       # 2. 振幅甄别 (软阈值截断)
-        temp = 10.0
-        coeffs_filtered = []
+    #    # 2. 振幅甄别 (软阈值截断)
+    #     temp = 10.0
+    #     coeffs_filtered = []
         
-        # [根据开关决定 tau 的来源]
-        if self.use_static_conditioned_wavelet:
-            # 动态域自适应 tau: [bs, 4]
-            tau_raw = self.wavelet_tau_mlp(e_site)
-            # 扩展到 [bs*n_vars, 4]
-            tau_raw = tau_raw.repeat_interleave(n_vars, dim=0)
-            tau_pos = torch.nn.functional.softplus(tau_raw)
-        else:
-            # 全局统一静态 tau: [4]
-            tau_static = torch.nn.functional.softplus(self.wavelet_tau)
-            # 同样扩展到 [bs*n_vars, 4] 以保持下游代码形状一致
-            tau_pos = tau_static.unsqueeze(0).expand(bs * n_vars, -1)
+    #     # [根据开关决定 tau 的来源]
+    #     if self.use_static_conditioned_wavelet:
+    #         # 动态域自适应 tau: [bs, 4]
+    #         tau_raw = self.wavelet_tau_mlp(e_site)
+    #         # 扩展到 [bs*n_vars, 4]
+    #         tau_raw = tau_raw.repeat_interleave(n_vars, dim=0)
+    #         tau_pos = torch.nn.functional.softplus(tau_raw)
+    #     else:
+    #         # 全局统一静态 tau: [4]
+    #         tau_static = torch.nn.functional.softplus(self.wavelet_tau)
+    #         # 同样扩展到 [bs*n_vars, 4] 以保持下游代码形状一致
+    #         tau_pos = tau_static.unsqueeze(0).expand(bs * n_vars, -1)
         
-        # 处理近似层 (VIP通道开关)
-        if self.filter_approx:
-            scale_0 = coeffs[0].detach().abs().mean().clamp(min=1e-6)
-            tau_approx = tau_pos[:, 0].view(-1, 1, 1) * scale_0
-            filtered_approx = self._soft_threshold_sigmoid(coeffs[0], tau_approx, scale_0, temp=5.0)
-            coeffs_filtered.append(filtered_approx)
-        else:
-            coeffs_filtered.append(coeffs[0])  # VIP 通道，不截断
+    #     # 处理近似层 (VIP通道开关)
+    #     if self.filter_approx:
+    #         scale_0 = coeffs[0].detach().abs().mean().clamp(min=1e-6)
+    #         tau_approx = tau_pos[:, 0].view(-1, 1, 1) * scale_0
+    #         filtered_approx = self._soft_threshold_sigmoid(coeffs[0], tau_approx, scale_0, temp=5.0)
+    #         coeffs_filtered.append(filtered_approx)
+    #     else:
+    #         coeffs_filtered.append(coeffs[0])  # VIP 通道，不截断
 
-        # 处理细节层
-        for i in range(1, len(coeffs)):
-            scale_i = coeffs[i].detach().abs().mean().clamp(min=1e-6)
-            tau_detail = tau_pos[:, i].view(-1, 1, 1) * scale_i
-            filtered_detail = self._soft_threshold_sigmoid(coeffs[i], tau_detail, scale_i, temp=5.0)
-            coeffs_filtered.append(filtered_detail)
+    #     # 处理细节层
+    #     for i in range(1, len(coeffs)):
+    #         scale_i = coeffs[i].detach().abs().mean().clamp(min=1e-6)
+    #         tau_detail = tau_pos[:, i].view(-1, 1, 1) * scale_i
+    #         filtered_detail = self._soft_threshold_sigmoid(coeffs[i], tau_detail, scale_i, temp=5.0)
+    #         coeffs_filtered.append(filtered_detail)
+        coeffs_filtered = coeffs
             
         # 3. 多分辨率独立重构 (MRA)
         mra_branches = []
         for i in range(len(coeffs_filtered)):
-            # 每次只保留一个层级的系数，其他全部置零
-            # single_level_coeffs = []
-            # for j in range(len(coeffs_filtered)):
-            #     if i == j:
-            #         single_level_coeffs.append(coeffs_filtered[j])
-            #     else:
-            #         single_level_coeffs.append(torch.zeros_like(coeffs_filtered[j]))
-            
-            # # 独立重构当前频率分支
-            # branch_recon = ptwt.waverec(single_level_coeffs, wavelet)
-            # if branch_recon.shape[-1] > seq_len:
-            #     branch_recon = branch_recon[..., :seq_len]  # 截断冗余
             if self.use_swt_wavelet:
                 branch_recon = coeffs_filtered[i]
             else:
@@ -469,65 +457,19 @@ class Model(nn.Module):
         
         # 4. 时序聚焦 (全分支统一处理)
         x_mra_flat = x_mra.view(-1, 1, seq_len)  # 展平以便通过 Conv1d
-        time_mask = self.temporal_mask_net(x_mra_flat)
+        # time_mask = self.temporal_mask_net(x_mra_flat)
         # x_mra_focused = x_mra_flat * time_mask
-        x_mra_focused = x_mra_flat
         
         # 5. 恢复 4D 结构以兼容原 SEMPO
         # [freq_num * bs * n_vars, 1, seq_len] -> [freq_num, bs, n_vars, seq_len]
-        x_out = x_mra_focused.view(self.freq_num, bs, n_vars, seq_len)
-
-        # if getattr(self, 'save_vis_flag', False):
-        #     # print(f"\n [Visualizer] 正在截取小波中间变量，保存至 {self.vis_save_dir} ...")
-        #     save_dict = {
-        #         'x_in': x_in.detach().cpu().numpy(),
-        #         'x_mra': x_mra.detach().cpu().numpy(),
-        #         'x_out': x_out.detach().cpu().numpy(),
-        #         'time_mask': time_mask.detach().cpu().numpy() # 顺便把时序聚光灯的权重也存下来，非常有价值
-        #     }
-        #     # 遍历保存分解系数（因为每层长度不同，分开命名）
-        #     for idx, c in enumerate(coeffs):
-        #         save_dict[f'coeff_orig_{idx}'] = c.detach().cpu().numpy()
-        #     for idx, c in enumerate(coeffs_filtered):
-        #         save_dict[f'coeff_filtered_{idx}'] = c.detach().cpu().numpy()
-                
-        #     # np.savez(os.path.join(self.vis_save_dir, 'epoch5_wavelet_data_031_haar_res.npz'), **save_dict)
-        #     # print(" [Visualizer] 保存成功！已自动关闭开关，防止重复保存。")
-            
-        #     # 阅后即焚，保证整个训练过程只存这一个 Batch，防止硬盘爆炸
-        #     self.save_vis_flag = False
+        x_out = x_mra_flat.view(self.freq_num, bs, n_vars, seq_len)
             
         # [freq_num, bs, seq_len, n_vars]
         x_out = x_out.permute(0, 1, 3, 2)
-        # x_out = x_mra.view(self.freq_num, bs, n_vars, seq_len).permute(0, 1, 3, 2)
-        # 把报警器也恢复成 4D 结构对齐输出
-        # mask_out = time_mask.view(self.freq_num, bs, n_vars, seq_len).permute(0, 1, 3, 2)
+
         
         return x_out
 
-        # # [修改点 2] 分离趋势与细节，生成独立掩码
-        # # coeffs[0] 对应 mra_branches[0]，即 A3 (低频基线)
-        # x_trend_mra = mra_branches[0]  # [bs * n_vars, 1, seq_len]
-        
-        # # 剩下的对应 D3, D2, D1 (高频细节)
-        # x_detail_mra = torch.stack(mra_branches[1:], dim=0)  # [3, bs * n_vars, 1, seq_len]
-        
-        # # 时序聚焦 (仅针对高频细节提取突变报警器)
-        # x_detail_flat = x_detail_mra.view(-1, 1, seq_len)  
-        # time_mask = self.temporal_mask_net(x_detail_flat)
-        
-        # # 恢复 3D/4D 结构
-        # # 趋势直接恢复成 [bs, seq_len, n_vars]
-        # x_trend_out = x_trend_mra.view(bs, n_vars, seq_len).permute(0, 2, 1)
-        
-        # # 细节和掩码恢复成 [freq_num, bs, seq_len, n_vars]
-        # x_detail_out = x_detail_mra.view(self.freq_num, bs, n_vars, seq_len).permute(0, 1, 3, 2)
-        # mask_out = time_mask.view(self.freq_num, bs, n_vars, seq_len).permute(0, 1, 3, 2)
-
-        # # if getattr(self, 'save_vis_flag', False):
-        # #     self.save_vis_flag = False # 阅后即焚
-            
-        # return x_trend_out, x_detail_out, mask_out
     
     def static_to_encoder_prefix(self, e_site, bs):
         """
@@ -857,17 +799,13 @@ class Model(nn.Module):
             'patch_embed',             # 局部块嵌入
             'projection_x',             # 输入投影
             'W_pos',
-            # 'wavelet_tau',             # 新增：小波层级振幅阈值
-            # 'wavelet_tau_mlp'
             'temporal_mask_net',
-            # 'freq_weight' ,
-            # 'trend_projection'
         ]
-        # [动态追加 MAML 学习模块]
-        if getattr(self, 'use_static_conditioned_wavelet', False):
-            maml_module_names.append('wavelet_tau_mlp')
-        else:
-            maml_module_names.append('wavelet_tau')
+        # # [动态追加 MAML 学习模块]
+        # if getattr(self, 'use_static_conditioned_wavelet', False):
+        #     maml_module_names.append('wavelet_tau_mlp')
+        # else:
+        #     maml_module_names.append('wavelet_tau')
 
         if getattr(self, 'use_context_memory', False):
             maml_module_names.extend([
