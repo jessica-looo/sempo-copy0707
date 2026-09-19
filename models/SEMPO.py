@@ -197,10 +197,6 @@ class Model(nn.Module):
        
         # Head    
 
-        # Same-time 32-year experiment: shared patch decoder with overlap averaging.
-        assert self.seq_len == self.pred_len == 32
-        assert self.patch_len == 16 and self.stride == 8
-        assert self.s_begin == 0 and list(self.horizon_lengths) == [32]
         self.pretrain_heads = nn.ModuleList([
             SharedPatchPredictionHead(
                 self.d_model, self.patch_len, self.stride, self.pred_len, head_dropout

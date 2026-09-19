@@ -13,6 +13,7 @@ from scipy.stats import median_abs_deviation
 from scipy.stats import spearmanr
 from scipy.signal import detrend
 from data_provider.data_processing import *
+from data_provider.icecore_relation_pretrain_loader import Dataset_IceCore_RelationPretrain
 
 warnings.filterwarnings('ignore')
 
@@ -1006,6 +1007,85 @@ class Dataset_IceCore_CrossVar(Dataset):
             if self.y_scaler is not None:
                 return self.y_scaler.inverse_transform(data)
             return data
+        
+class Dataset_FCR_CrossVar(Dataset_IceCore_CrossVar):
+    """One simulation per task; day indices use the existing year field."""
+
+    def __init__(self, root_path, x_data_path, y_data_path, flag='train',
+                 size=(32, 0, 32), support_ratio=0.66, encoder_proto_path=None,
+                 target_anchor_residual=True, target_anchor_len=16):
+        self.seq_len = size[0]
+        self.scale = True
+        self.target_anchor_residual = target_anchor_residual
+        self.target_anchor_len = target_anchor_len
+        x = pd.read_csv(os.path.join(root_path, x_data_path)).set_index('year').sort_index()
+        y = pd.read_csv(os.path.join(root_path, y_data_path)).set_index('year').sort_index()
+        assert x.index.equals(y.index) and x.columns.equals(y.columns)
+        assert np.isfinite(x.to_numpy()).all() and np.isfinite(y.to_numpy()).all()
+        sites = [f'FCR_{i:04d}' for i in range(1, 51)]
+        order = np.random.default_rng(2030).permutation(len(sites))
+        shuffled = [sites[i] for i in order]
+        n_train, n_val = int(len(sites) * 0.6), int(len(sites) * 0.2)
+        self.train_sites = shuffled[:n_train]
+        self.val_sites = shuffled[n_train:n_train + n_val]
+        self.test_sites = shuffled[n_train + n_val:]
+        self.current_sites = {'train': self.train_sites, 'val': self.val_sites,
+                              'test': self.test_sites, 'pretrain': sites}[flag]
+        self.support_len = int(len(x) * support_ratio)
+        assert self.seq_len <= self.support_len <= len(x) - self.seq_len
+        fit_sites = sites if flag == 'pretrain' else self.train_sites
+        self.x_scaler = StandardScaler().fit(x[fit_sites].iloc[:self.support_len].to_numpy().reshape(-1, 1))
+        self.y_scaler = StandardScaler().fit(y[fit_sites].iloc[:self.support_len].to_numpy().reshape(-1, 1))
+        self.data_x_list = [self.x_scaler.transform(x[[site]]).astype(np.float32)
+                            for site in self.current_sites]
+        self.data_y_list = [self.y_scaler.transform(y[[site]]).astype(np.float32)
+                            for site in self.current_sites]
+        self.year_list = [x.index.to_numpy(dtype=np.float32)] * len(self.current_sites)
+        self.data_stamp_list = [make_year_stamp(x.index)] * len(self.current_sites)
+        self.support_len_list = [self.support_len] * len(self.current_sites)
+        self.site_cluster_map = {}  # Random scenario split; no cluster-balanced sampling.
+        if flag == 'pretrain':
+            self.static_feat_list = [np.empty(0, dtype=np.float32)] * len(sites)
+        else:
+            sim_map, _, _, _ = load_encoder_proto_static(encoder_proto_path)
+            self.static_feat_list = [sim_map[site] for site in self.current_sites]
+
+    def __getitem__(self, index):
+        x, y = self.data_x_list[index], self.data_y_list[index]
+        support = x[:self.support_len]
+        x = ((x - support.mean(0)) / np.sqrt(support.var(0) + 1e-5)).astype(np.float32)
+        anchor = np.zeros((1, 1), dtype=np.float32)
+        if self.target_anchor_residual:
+            start = max(0, self.support_len - self.target_anchor_len)
+            anchor = y[start:self.support_len].mean(0, keepdims=True)
+        windows = build_same_time_windows(
+            x, y - anchor, self.data_stamp_list[index], self.year_list[index],
+            self.seq_len, self.support_len, stride=1)
+        mean_x, mean_y = build_mean_windows_same_time(
+            np.zeros_like(x), np.broadcast_to(anchor, y.shape),
+            self.seq_len, self.support_len, len(x), stride=1)
+        return pack_maml_return(windows, self.static_feat_list[index], mean_x, mean_y)
+
+
+class Dataset_FCR_RelationPretrain(Dataset_IceCore_RelationPretrain):
+    """Reuse relation window sampling on every scenario's support; no static prefix."""
+
+    def __read_data__(self):
+        data = Dataset_FCR_CrossVar(
+            self.root_path, self.x_data_path, self.y_data_path, flag='pretrain',
+            size=(self.seq_len, 0, self.seq_len), support_ratio=self.support_ratio)
+        self.site_names = data.current_sites
+        self.num_sites = len(self.site_names)
+        self.data_x_list, self.data_y_list = [], []
+        for values, target in ((data.data_x_list, self.data_x_list),
+                               (data.data_y_list, self.data_y_list)):
+            for series in values:
+                history = series[:data.support_len]
+                target.append(((history - history.mean(0)) /
+                               np.sqrt(history.var(0) + 1e-5)).astype(np.float32))
+        self.data_stamp_list = [make_year_stamp(years[:data.support_len])
+                                for years in data.year_list]
+        self.static_feat_list = data.static_feat_list
 
 class Dataset_IceCore_MS(Dataset):
     """
@@ -1708,3 +1788,5 @@ class Dataset_IceCore_MS(Dataset):
         inv = np.concatenate(columns, axis=1)
 
         return inv.reshape(original_shape)
+
+

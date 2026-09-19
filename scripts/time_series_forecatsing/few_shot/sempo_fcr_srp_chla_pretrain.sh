@@ -1,0 +1,51 @@
+#!/bin/bash
+export CUDA_VISIBLE_DEVICES=0
+
+python run.py \
+  --task_name long_term_forecast \
+  --model SEMPO \
+  --data fcr_crossvar \
+  --icecore_task_type crossvar \
+  --root_path ./dataset/fcr/ \
+  --x_data_path SRP_ugL.csv \
+  --y_data_path Chla_ugL.csv \
+  --is_relation_pretraining \
+  --is_pretraining 0 \
+  --is_training 0 \
+  --is_zeroshot 0 \
+  --features M \
+  --c_in 1 \
+  --seq_len 256 \
+  --pred_len 256 \
+  --horizon_lengths 256 \
+  --patch_len 64 \
+  --stride 32 \
+  --d_model 256 \
+  --e_layers 3 \
+  --d_layers 3 \
+  --head_type prediction \
+  --domain_len 128 \
+  --filter_approx \
+  --support_ratio 0.66 \
+  --train_epochs 100 \
+  --relation_early_stop_epoch 15 \
+  --batch_size 512 \
+  --learning_rate 1e-3 \
+  --weight_decay 0.05 \
+  --num_workers 4 \
+  --use_pair_diff 0 \
+  --use_pair_product 1 \
+  --relation_pretrain_samples_per_site 200 \
+  --relation_loss_site_weight 1.0 \
+  --relation_loss_aug_weight 0.5 \
+  --relation_loss_xy_weight 0.1 \
+  --relation_loss_proto_weight 0.2 \
+  --use_online_prototypes \
+  --num_prototypes 5 \
+  --prototype_warmup_epochs 5 \
+  --prototype_cluster_interval 2 \
+  --prototype_momentum 0.5 \
+  --prototype_temperature 0.2 \
+  --checkpoints checkpoints/fcr_srp_chla/pretrain \
+  --prototype_output_path prototypes/fcr_srp_chla_k3.npz \
+  "$@"

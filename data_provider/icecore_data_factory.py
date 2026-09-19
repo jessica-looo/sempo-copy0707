@@ -8,6 +8,8 @@ from data_provider.icecore_data_loader import (
     Dataset_IceCore_S,
     Dataset_IceCore_CrossVar,
     Dataset_IceCore_MS,
+    Dataset_FCR_CrossVar,
+    Dataset_FCR_RelationPretrain,
 )
 from data_provider.icecore_relation_pretrain_loader import Dataset_IceCore_RelationPretrain
 
@@ -92,6 +94,15 @@ def _build_dataset(args, flag, timeenc):
         icecore_crossvar
         icecore_ms
     """
+    if args.data == 'fcr_crossvar':
+        return Dataset_FCR_CrossVar(
+            root_path=args.root_path, x_data_path=args.x_data_path,
+            y_data_path=args.y_data_path, flag=flag,
+            size=[args.seq_len, args.label_len, args.pred_len],
+            support_ratio=args.support_ratio, encoder_proto_path=args.encoder_proto_path,
+            target_anchor_residual=args.target_anchor_residual,
+            target_anchor_len=args.target_anchor_len)
+
     task_type = get_icecore_task_type(args)
 
     if task_type == 's':
@@ -195,7 +206,8 @@ def data_provider(args, flag):
     if getattr(args, 'is_relation_pretraining', False):
         if flag != 'train':
             raise ValueError("Relation pretraining only builds the train split.")
-        data_set = Dataset_IceCore_RelationPretrain(
+        Data = Dataset_FCR_RelationPretrain if args.data == 'fcr_crossvar' else Dataset_IceCore_RelationPretrain
+        data_set = Data(
             root_path=args.root_path,
             x_data_path=args.x_data_path,
             y_data_path=args.y_data_path,
