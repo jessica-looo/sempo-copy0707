@@ -618,7 +618,7 @@ class Model(nn.Module):
             x = torch.cat([x, e_site_repeat], dim=-1)
             x = self.feature_fusion(x)
 
-        x = self.projection_x(x.permute(0, 2, 1)).permute(0, 2, 1)
+        # x = self.projection_x(x.permute(0, 2, 1)).permute(0, 2, 1)
         x = self.decomposed_wavelet_learning(x, e_site=e_site)
         x = x[:, :, self.s_begin:, :]
         x = x.unfold(dimension=2, size=self.patch_len, step=self.stride)
@@ -662,7 +662,7 @@ class Model(nn.Module):
             x = self.feature_fusion(x)
 
         # projection 
-        x = self.projection_x(x.permute(0, 2, 1)).permute(0, 2, 1)
+        # x = self.projection_x(x.permute(0, 2, 1)).permute(0, 2, 1)
         # import pdb;pdb.set_trace()
         # decomposed frequency learning
         x_wavelet= self.decomposed_wavelet_learning(x,e_site=e_site)    
@@ -805,7 +805,7 @@ class Model(nn.Module):
             'static_kv_proj_en',
             'static_kv_proj_de',
             'patch_embed',             # 局部块嵌入
-            'projection_x',
+            # 'projection_x',
             'W_pos',
             'temporal_mask_net',
         ]

@@ -34,12 +34,12 @@ python run.py \
   --e_layers 3 \
   --d_layers 3 \
   --percent 100 \
-  --train_epochs 100 \
+  --train_epochs 200 \
   --relation_early_stop_epoch 15 \
   --batch_size 64 \
   --domain_len 128 \
   --d_model 256 \
-  --learning_rate 1e-4 \
+  --learning_rate 1e-3 \
   --weight_decay 0.05 \
   --head_type prediction \
   --num_workers 4 \
