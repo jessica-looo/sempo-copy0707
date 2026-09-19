@@ -4,6 +4,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 from layers.RevIN import RevIN
+from layers.SEMPO_EncDec import SharedPatchPredictionHead
 from layers.SEMPO_EncDec import TSTEncoder, TowerEncoder, MixtrueExpertsLayer, PredictionHead, PretrainHead
 from layers.pos_encoding import positional_encoding
 import pywt
@@ -195,10 +196,16 @@ class Model(nn.Module):
         self.dropout2 = nn.Dropout(dropout2)
        
         # Head    
-        pretrain_head_list = []
-        for horizon_length in self.horizon_lengths:
-            pretrain_head_list.append(PredictionHead(individual, self.n_vars, self.d_model, self.patch_num, horizon_length, head_dropout))
-        self.pretrain_heads = nn.ModuleList(pretrain_head_list)
+
+        # Same-time 32-year experiment: shared patch decoder with overlap averaging.
+        assert self.seq_len == self.pred_len == 32
+        assert self.patch_len == 16 and self.stride == 8
+        assert self.s_begin == 0 and list(self.horizon_lengths) == [32]
+        self.pretrain_heads = nn.ModuleList([
+            SharedPatchPredictionHead(
+                self.d_model, self.patch_len, self.stride, self.pred_len, head_dropout
+            )
+        ])
 
         # ===== FiLM: encoder output -> decoder input =====
         self.static_emb_dim = getattr(configs, 'static_emb_dim', 8)
@@ -268,11 +275,11 @@ class Model(nn.Module):
     def mixture_of_experts(self, x, bs, encode=True):
         if encode:
             past_key_values = self.domain_EnMoE(x, self.domain_tokens.to(x.device))      # [bs' x patch_num * n_vars x 2 * e_layers * d_model]
-            past_key_values = past_key_values.view(self.e_layers, 2, bs * self.freq_num, -1, self.d_model)   # [e_layers x 2 x bs' x patch_num * n_vars x d_model]           
+            past_key_values = past_key_values.reshape(bs * self.freq_num, -1, self.e_layers, 2, self.d_model).permute(2, 3, 0, 1, 4)
         else:
-            x = x.reshape(bs, -1, self.d_model)
+            x = x.permute(0, 1, 3, 2).reshape(bs, -1, self.d_model)
             past_key_values = self.domain_DeMoE(x, self.domain_tokens.to(x.device))   # [bs x patch_num * n_vars x 2 * d_layers * d_model]
-            past_key_values = past_key_values.view(self.d_layers, 2, bs, -1, self.d_model)    # [d_layers x 2 x bs x patch_num * n_vars x d_model]
+            past_key_values = past_key_values.reshape(bs, -1, self.d_layers, 2, self.d_model).permute(2, 3, 0, 1, 4)
         past_key_values = self.dropout2(past_key_values)
         return past_key_values
    
@@ -603,7 +610,8 @@ class Model(nn.Module):
         else:
             e_site = None
 
-        x = self.revin_layer_x(x_enc, 'norm')
+        # x = self.revin_layer_x(x_enc, 'norm')
+        x = x_enc
 
         if self.use_static_concat and e_site is not None:
             e_site_repeat = e_site.unsqueeze(1).repeat(1, x.shape[1], 1)
@@ -645,8 +653,8 @@ class Model(nn.Module):
         else:
             b_site = 0
         # norm  
-        x = self.revin_layer_x(x_enc, 'norm')        # [bs x seq_len x n_vars]
-        # x = x_enc
+        # x = self.revin_layer_x(x_enc, 'norm')        # [bs x seq_len x n_vars]
+        x = x_enc
 
         if self.use_static_concat and e_site is not None:
             e_site_repeat = e_site.unsqueeze(1).repeat(1, x.shape[1], 1)
@@ -755,7 +763,7 @@ class Model(nn.Module):
             y = y + b_site
         x = self.head(x)
         x = x.reshape(bs, patch_num * patch_len, n_vars)
-        x = self.revin_layer_x(x, 'denorm')
+        # x = self.revin_layer_x(x, 'denorm')
         return y,  x
 
         # # [修改点 3-B] 预测头合并 (细节预测 + 趋势预测)
@@ -776,7 +784,7 @@ class Model(nn.Module):
     def get_maml_parameters(self):
         """
         专门为 FOMAML 准备：
-        1. 冻结所有不参与内层循环的参数 (Backbone, MoE Transform)。
+        1. 冻结未选中的参数；当前 encoder、decoder 和前缀模块参与更新。
         2. 返回需要进行 Meta-Learning 更新的参数字典。
         """
         # 1. 首先，暴力的全局冻结
@@ -797,10 +805,11 @@ class Model(nn.Module):
             'static_kv_proj_en',
             'static_kv_proj_de',
             'patch_embed',             # 局部块嵌入
-            'projection_x',             # 输入投影
+            'projection_x',
             'W_pos',
             'temporal_mask_net',
         ]
+        maml_module_names.extend(['encoder.', 'decoder.'])
         # # [动态追加 MAML 学习模块]
         # if getattr(self, 'use_static_conditioned_wavelet', False):
         #     maml_module_names.append('wavelet_tau_mlp')
@@ -839,9 +848,5 @@ class Model(nn.Module):
                 
         # 6. 打包返回 requires_grad=True 的参数（用于传入 MAML 优化器）
         maml_params = {name: param for name, param in self.named_parameters() if param.requires_grad}
-        
-        print(f"FOMAML 模式激活：冻结主干，仅开放 {len(maml_params)} 个参数张量进行元学习。")
-        for k in maml_params.keys():
-            print(f"  - 可学习: {k}")
-            
+                    
         return maml_params

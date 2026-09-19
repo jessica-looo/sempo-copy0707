@@ -61,7 +61,7 @@ torchrun --nnodes=1 --nproc_per_node=1 --master_port=29503 run.py \
   --use_static_kv \
   --static_emb_dim 64 \
   --static_dim 14 \
-  --cluster_result_path "cluster/accum/accum_100y_cluster_mapped.csv" \
+  --cluster_result_path "cluster/chem/chem_cluster.csv" \
   --is_maml 1 \
   --inner_steps 2 \
   --inner_lr 5e-3 \
@@ -82,11 +82,13 @@ torchrun --nnodes=1 --nproc_per_node=1 --master_port=29503 run.py \
   --target_anchor_len 16 \
   --use_pair_diff $use_pair_diff \
   --use_pair_product $use_pair_product \
-  --use_context_memory \
-  --context_memory_gate_init -2.0 \
-  --context_memory_tokens 16 \
-  --context_memory_dropout 0.1 \
   --use_encoder_proto_static \
-  --encoder_proto_path prototypes/chem_accum_crossvar_relation_pretrain_proto_k${num_prototypes}.npz \
-  --relation_pretrain_checkpoint checkpoints/${relation_pretrain_setting}/checkpoint.pth \
+  --encoder_proto_path prototypes/chem_accum_crossvar_relation_pretrain_proto_k${num_prototypes}_no_projection.npz \
+  --relation_pretrain_checkpoint checkpoints/no_projection/${relation_pretrain_setting}/checkpoint.pth \
+  --cv_dir results/cv_chem_linear_residual_no_projection_patch_head \
+  --checkpoints results/cv_chem_linear_residual_no_projection_patch_head/checkpoints \
   "$@"
+  # --use_context_memory \
+  # --context_memory_gate_init -2.0 \
+  # --context_memory_tokens 16 \
+  # --context_memory_dropout 0.1 \

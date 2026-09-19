@@ -153,8 +153,14 @@ class Dataset_IceCore_RelationPretrain(Dataset):
             _ = compute_detrended_spearman(x_raw, y_raw, min_len=30)
 
             self.site_names.append(clean_site_name(site))
-            self.data_x_list.append(x_vals[:history_len].astype(np.float32))
-            self.data_y_list.append(y_vals[:history_len].astype(np.float32))
+            for values, target in (
+                (x_vals, self.data_x_list),
+                (y_vals, self.data_y_list),
+            ):
+                history = values[:history_len]
+                mu = history.mean(axis=0, keepdims=True)
+                std = np.sqrt(history.var(axis=0, keepdims=True) + 1e-5)
+                target.append(((history - mu) / std).astype(np.float32))
             self.data_stamp_list.append(make_year_stamp(years[:history_len]).astype(np.float32))
             self.static_feat_list.append(static_feat)
 

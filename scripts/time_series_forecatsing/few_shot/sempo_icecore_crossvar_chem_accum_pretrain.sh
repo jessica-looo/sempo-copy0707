@@ -66,4 +66,6 @@ python run.py \
   --prototype_cluster_interval 2 \
   --prototype_momentum 0.5 \
   --prototype_temperature 0.2 \
-  --prototype_output_path prototypes/chem_accum_crossvar_relation_pretrain_proto_k${num_prototypes}.npz
+  --checkpoints checkpoints/no_projection \
+  --prototype_output_path prototypes/chem_accum_crossvar_relation_pretrain_proto_k${num_prototypes}_no_projection.npz \
+  "$@"

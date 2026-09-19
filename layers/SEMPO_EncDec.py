@@ -91,6 +91,32 @@ class PredictionHead(nn.Module):
         return x.transpose(2,1)  # [bs x forecast_len x n_vars]
 
 
+class SharedPatchPredictionHead(nn.Module):
+    """Decode each patch with shared weights, then average overlapping years."""
+
+    def __init__(self, d_model, patch_len, stride, forecast_len, dropout=0.0):
+        super().__init__()
+        assert 0 < stride <= patch_len
+        self.stride = stride
+        self.forecast_len = forecast_len
+        self.dropout = nn.Dropout(dropout)
+        self.linear = nn.Linear(d_model, patch_len)
+
+    def forward(self, x):
+        # [B, C, D, P] -> [B, C, P, patch_len]
+        patches = self.linear(self.dropout(x.transpose(-1, -2)))
+        batch, channels, patch_num, patch_len = patches.shape
+        length = (patch_num - 1) * self.stride + patch_len
+        assert length == self.forecast_len
+        output = patches.new_zeros(batch, channels, length)
+        count = patches.new_zeros(length)
+        for i in range(patch_num):
+            start = i * self.stride
+            output[:, :, start:start + patch_len] += patches[:, :, i, :]
+            count[start:start + patch_len] += 1
+        return (output / count).transpose(1, 2)
+
+
 class PretrainHead(nn.Module):
     def __init__(self, d_model, patch_len, dropout):
         super().__init__()

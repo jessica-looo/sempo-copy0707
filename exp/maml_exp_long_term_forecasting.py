@@ -435,6 +435,25 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         return criterion(recons, true_patches)
 
 
+    @torch.no_grad()
+    def _site_linear_baseline(self, sx, sy, qx):
+        # Other forecasting tasks retain their original prediction behavior.
+        if getattr(self.args, 'icecore_task_type', None) != 'crossvar':
+            return 0.0, 0.0
+        # Same-time, single-channel, ordered stride=1 windows only.
+        assert self.args.features == "M"
+        assert sx.ndim == 3 and sx.shape == sy.shape and sx.shape[-1] == 1
+        assert qx.shape[1:] == sx.shape[1:]
+        assert sx.size(0) > 0
+        assert torch.allclose(sx[:-1, 1:], sx[1:, :-1])
+        assert torch.allclose(sy[:-1, 1:], sy[1:, :-1])
+        x = torch.cat([sx[0], sx[1:, -1]], dim=0)
+        y = torch.cat([sy[0], sy[1:, -1]], dim=0)
+        xc, yc = x - x.mean(), y - y.mean()
+        a = (xc * yc).sum() / xc.square().sum().clamp_min(1e-12)
+        b = y.mean() - a * x.mean()
+        return a * sx + b, a * qx + b
+
     def vali(self, vali_data, vali_loader, criterion, maml_params_dict=None):
         total_loss = []
         # 注意：这里千万不要写 with torch.no_grad(): 
@@ -462,6 +481,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 t_qy = query_y[task_idx]
                 t_qx_mark = query_x_mark[task_idx]
                 t_qy_mark = query_y_mark[task_idx]
+                linear_s, linear_q = self._site_linear_baseline(t_sx, t_sy, t_qx)
                 
                 t_static = static_feat[task_idx].unsqueeze(0).repeat(t_sx.size(0), 1)
                 
@@ -482,6 +502,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                         outputs_supp = torch.cat([outputs_supp[j][:, -h:, f_dim:] 
                                                 for j, h in enumerate(self.args.horizon_lengths) if j in self.idx], dim=1)
                         t_sy_pred = t_sy[:, -self.args.pred_len:, f_dim:]
+                    outputs_supp = outputs_supp + linear_s
 
 
                     # if getattr(self.args, 'residual_prediction', False):
@@ -540,6 +561,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     outputs_query = torch.cat([outputs_query[j][:, -h:, f_dim:] 
                                             for j, h in enumerate(self.args.horizon_lengths) if j in self.idx], dim=1)
                     t_qy_pred = t_qy[:, -self.args.pred_len:, f_dim:]
+                outputs_query = outputs_query + linear_q
 
                 # if getattr(self.args, 'residual_prediction', False):
                 #     t_qy_pred_res = t_qy_pred - query_y_mean[task_idx]
@@ -621,6 +643,19 @@ class Exp_Long_Term_Forecast(Exp_Basic):
             else:
                 print(f'Relation pretrain checkpoint not found: {relation_ckpt_path}')
 
+        # Initialize the correction once, after loading relation-pretrained weights.
+        if (getattr(self.args, 'icecore_task_type', None) == 'crossvar'
+                and self.args.train_epochs > 0):
+            assert self.model.disable_output_revin_denorm
+            with torch.no_grad():
+                for head in self.model.pretrain_heads:
+                    head.linear.weight.zero_()
+                    head.linear.bias.zero_()
+                if self.model.use_static_bias:
+                    self.model.bias_head.weight.zero_()
+                    self.model.bias_head.bias.zero_()
+            print('Prediction: support linear baseline + SEMPO correction (zero initialized)')
+
         path = os.path.join(self.args.checkpoints, setting)
         if not os.path.exists(path):
             os.makedirs(path)
@@ -690,6 +725,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     t_qy = query_y[task_idx]
                     t_qx_mark = query_x_mark[task_idx]
                     t_qy_mark = query_y_mark[task_idx]
+                    linear_s, linear_q = self._site_linear_baseline(t_sx, t_sy, t_qx)
                     
                     t_static = static_feat[task_idx].unsqueeze(0).repeat(t_sx.size(0), 1) # 扩展到窗口维度(样本数量)
 
@@ -725,6 +761,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                             outputs_supp = torch.cat([outputs_supp[j][:, -h:, f_dim:] 
                                                     for j, h in enumerate(self.args.horizon_lengths) if j in self.idx], dim=1)
                             t_sy_pred = t_sy[:, -self.args.pred_len:, f_dim:]
+                        outputs_supp = outputs_supp + linear_s
                         # if getattr(self.args, 'residual_prediction', False):
                         #     t_sy_pred = t_sy_pred - support_y_mean[task_idx]
                         recon_loss_supp = self._compute_recon_loss(recons_supp, t_sx, f_dim, criterion)
@@ -732,9 +769,6 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                         # inner_loss = criterion(outputs_supp, t_sy_pred)+ recon_loss_supp
                         # inner_loss = criterion(outputs_supp, t_sy_pred)
                         inner_loss = self._forecast_loss(outputs_supp, t_sy_pred, criterion)
-
-                        # 【FOMAML 核心】：计算一阶梯度，更新 fast_weights
-                        # create_graph=False (FOMAML 不算二阶导)
                         grads = torch.autograd.grad(inner_loss, fast_weights.values(), create_graph=False, allow_unused=True) #   - tau_main / mu_main / tau_res / mu_res
                         dead_tensors = []
                         for (name, param), grad in zip(fast_weights.items(), grads):
@@ -745,8 +779,6 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                             print("\n以下参数未参与梯度计算：")
                             for name in dead_tensors:
                                 print(f"  - {name}")
-                        # import pdb;pdb.set_trace()
-
                         # =======================================================
                         # ---> [全局梯度排查] 检查所有内层参数的梯度健康状况
                         # =======================================================
@@ -816,6 +848,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                         outputs_query = torch.cat([outputs_query[j][:, -h:, f_dim:] 
                                                 for j, h in enumerate(self.args.horizon_lengths) if j in self.idx], dim=1)
                         t_qy_pred = t_qy[:, -self.args.pred_len:, f_dim:]
+                    outputs_query = outputs_query + linear_q
 
                     # if getattr(self.args, 'residual_prediction', False):
                     #     t_qy_pred_res = t_qy_pred - query_y_mean[task_idx]
@@ -879,7 +912,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         
         if test:
             print('loading model')
-            self.model.load_state_dict(torch.load(os.path.join('./checkpoints/' + setting, 'checkpoint.pth')))
+            self.model.load_state_dict(torch.load(os.path.join(self.args.checkpoints, setting, 'checkpoint.pth')))
 
         preds = []
         trues = []
@@ -929,6 +962,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 t_qy = query_y[task_idx]
                 t_qx_mark = query_x_mark[task_idx]
                 t_qy_mark = query_y_mark[task_idx]
+                linear_s, linear_q = self._site_linear_baseline(t_sx, t_sy, t_qx)
                 
                 t_static = static_feat[task_idx].unsqueeze(0).repeat(t_sx.size(0), 1)
                 torch.set_grad_enabled(True)
@@ -952,6 +986,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                         outputs_supp = torch.cat([outputs_supp[j][:, -h:, f_dim:] 
                                                 for j, h in enumerate(self.args.horizon_lengths) if j in self.idx], dim=1)
                         t_sy_pred = t_sy[:, -self.args.pred_len:, f_dim:]
+
+                    outputs_supp = outputs_supp + linear_s
 
                     # if getattr(self.args, 'residual_prediction', False):
                     #         t_sy_pred = t_sy_pred - support_y_mean[task_idx]
@@ -1022,6 +1058,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     outputs_query = torch.cat([outputs_query[j][:, -h:, f_dim:] 
                                             for j, h in enumerate(self.args.horizon_lengths) if j in self.idx], dim=1)
                     t_qy_pred = t_qy[:, -self.args.pred_len:, f_dim:]
+                outputs_query = outputs_query + linear_q
                 if getattr(self.args, 'residual_prediction', False) or getattr(self.args, 'target_anchor_residual', False):
                     if self.args.features == "MS":
                         f_dim = self._ms_target_dim()

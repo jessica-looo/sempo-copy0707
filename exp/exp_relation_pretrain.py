@@ -294,7 +294,7 @@ class Exp_Relation_Pretrain(Exp_Basic):
                 losses.append(float(loss.detach().cpu()))
 
             avg_loss = float(np.mean(losses)) if losses else float('nan')
-            print(f"Epoch: {epoch + 1}, Loss: {avg_loss:.6f}, cost time: {time.time() - t0:.2f}s")
+            print(f"Epoch: {epoch + 1}, Loss: {avg_loss:.12f}, cost time: {time.time() - t0:.2f}s")
 
             if use_early_stop and np.isfinite(avg_loss):
                 improved = avg_loss < best_loss
@@ -319,7 +319,7 @@ class Exp_Relation_Pretrain(Exp_Basic):
                         'labels': snapshot_labels.copy() if snapshot_labels is not None else None,
                         'site_sim': snapshot_site_sim.copy() if snapshot_site_sim is not None else None,
                     }
-                    print(f"  Train-loss early stop: new best at epoch {epoch + 1}, loss={best_loss:.6f}")
+                    print(f"  Train-loss early stop: new best at epoch {epoch + 1}, loss={best_loss:.12f}")
                 else:
                     bad_epochs += 1
                     print(
@@ -331,7 +331,7 @@ class Exp_Relation_Pretrain(Exp_Basic):
                     print(
                         f"Early stopping relation pretrain at epoch {epoch + 1}. "
                         f"Best epoch: {best_snapshot['epoch'] if best_snapshot else 'N/A'}, "
-                        f"best train loss: {best_loss:.6f}"
+                        f"best train loss: {best_loss:.12f}"
                     )
                     break
 
@@ -347,7 +347,7 @@ class Exp_Relation_Pretrain(Exp_Basic):
             site_sim = best_snapshot['site_sim']
             print(
                 f"Restored best relation-pretrain snapshot from epoch "
-                f"{best_snapshot['epoch']} with train loss {best_loss:.6f}"
+                f"{best_snapshot['epoch']} with train loss {best_loss:.12f}"
             )
 
         if use_proto:

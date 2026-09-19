@@ -447,6 +447,7 @@ class Dataset_IceCore_CrossVar(Dataset):
                  encoder_proto_path=None,
                  use_old_cluster_onehot=False,
                  use_pretrain_cluster_onehot=False,
+                 fold_id=None,
                  verbose=True):
 
         # =========================
@@ -493,6 +494,7 @@ class Dataset_IceCore_CrossVar(Dataset):
         self.encoder_proto_path = encoder_proto_path
         self.use_old_cluster_onehot = use_old_cluster_onehot
         self.use_pretrain_cluster_onehot = use_pretrain_cluster_onehot
+        self.fold_id = fold_id
 
         # 保留参数，避免 data_factory / argparse 调用时报 unexpected keyword
         self.use_spectral_features = use_spectral_features
@@ -584,6 +586,7 @@ class Dataset_IceCore_CrossVar(Dataset):
             seed=2030,
             train_ratio=0.6,
             filter_cid=self.filter_cid,
+            fold_id=self.fold_id,
             preferred_test_site_ranks=preferred_test_site_ranks
         )
 
@@ -910,6 +913,11 @@ class Dataset_IceCore_CrossVar(Dataset):
         # =========================
         # 2. Same-time support/query windows
         # =========================
+        support_x = data_x_model[:site_support_len]
+        mu = support_x.mean(axis=0, keepdims=True)
+        std = np.sqrt(support_x.var(axis=0, keepdims=True) + 1e-5)
+        data_x_model = ((data_x_model - mu) / std).astype(np.float32)
+
         windows = build_same_time_windows(
             data_x=data_x_model,
             data_y=data_y_model,
@@ -1038,6 +1046,7 @@ class Dataset_IceCore_MS(Dataset):
                  encoder_proto_path=None,
                  use_old_cluster_onehot=False,
                  use_pretrain_cluster_onehot=False,
+                 fold_id=None,
                  verbose=True):
 
         # =========================
@@ -1063,6 +1072,7 @@ class Dataset_IceCore_MS(Dataset):
         self.y_data_path = y_data_path
         self.site_meta_path = site_meta_path
         self.cluster_result_path = cluster_result_path
+        self.fold_id = fold_id
 
         self.features = features
         self.target = target
@@ -1216,6 +1226,7 @@ class Dataset_IceCore_MS(Dataset):
             seed=2030,
             train_ratio=0.6,
             filter_cid=self.filter_cid,
+            fold_id=self.fold_id,
             preferred_test_site_ranks=preferred_test_site_ranks
         )
 
